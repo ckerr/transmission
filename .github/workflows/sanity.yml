@@ -50,7 +50,6 @@ jobs:
             -DCMAKE_OSX_DEPLOYMENT_TARGET=10.10
             -DDHT_PREFER_STATIC_LIB=ON \
             -DENABLE_CLI=ON \
-            -DENABLE_CLI=ON \
             -DENABLE_GTK=ON \
             -DENABLE_QT=ON
             -DUSE_SYSTEM_EVENT2=OFF \
@@ -376,7 +375,7 @@ jobs:
             -DCMAKE_BUILD_TYPE=RelWithDebInfo \
             -DCMAKE_INSTALL_PREFIX=pfx \
             -DCMAKE_PREFIX_PATH=`brew --prefix`/opt/qt@5 \
-            -DCMAKE_VERBOSE_MAKEFILE=ON
+            -DCMAKE_VERBOSE_MAKEFILE=ON \
             -DENABLE_CLI=ON \
             -DENABLE_GTK=ON \
             -DENABLE_MAC=ON \
@@ -430,7 +429,7 @@ jobs:
             -DCMAKE_BUILD_TYPE=RelWithDebInfo \
             -DCMAKE_INSTALL_PREFIX=pfx \
             -DCMAKE_PREFIX_PATH=`brew --prefix`/opt/qt@5 \
-            -DCMAKE_VERBOSE_MAKEFILE=ON
+            -DCMAKE_VERBOSE_MAKEFILE=ON \
             -DENABLE_CLI=ON \
             -DENABLE_GTK=ON \
             -DENABLE_MAC=ON \
