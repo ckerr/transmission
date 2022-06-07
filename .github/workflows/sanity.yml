@@ -244,10 +244,8 @@ jobs:
         with:
           name: binaries-${{ github.job }}
           path: pfx/**/*
-  debian-11-tarball:
+  transmission-src-tarball:
     runs-on: ubuntu-latest
-    container:
-      image: debian:11-slim
     steps:
       - name: Prepare
         run: |
@@ -280,7 +278,7 @@ jobs:
           name: tarball-${{ github.job }}
           path: obj/transmission*.tar.*
   debian-11-from-tarball:
-    needs: debian-11-tarball
+    needs: transmission-src-tarball
     runs-on: ubuntu-latest
     container:
       image: debian:11-slim
@@ -316,7 +314,7 @@ jobs:
       - name: Download tarball
         uses: actions/download-artifact@v3
         with:
-          name: tarball-debian-11-tarball
+          name: tarball-transmission-src-tarball
       - name: Extract sources from tarball
         run: mkdir src && tar xf transmission*.tar.* -C src --strip-components 1
       - name: Configure
@@ -394,7 +392,7 @@ jobs:
           name: binaries-${{ github.job }}
           path: pfx/**/*
   macos-from-tarball:
-    needs: debian-11-tarball
+    needs: transmission-src-tarball
     runs-on: macos-latest
     steps:
       - name: Prepare
@@ -416,7 +414,7 @@ jobs:
       - name: Download tarball
         uses: actions/download-artifact@v3
         with:
-          name: tarball-debian-11-tarball
+          name: tarball-transmission-src-tarball
       - name: Extract sources from tarball
         run: mkdir src && tar xf transmission*.tar.* -C src --strip-components 1
       - name: Configure
