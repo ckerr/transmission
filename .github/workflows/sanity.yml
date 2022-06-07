@@ -372,6 +372,7 @@ jobs:
             -S src \
             -B obj \
             -G Ninja \
+            -DCMAKE_BUILD_FLAGS='--trace-includes' \
             -DCMAKE_BUILD_TYPE=RelWithDebInfo \
             -DCMAKE_INSTALL_PREFIX=pfx \
             -DCMAKE_PREFIX_PATH=`brew --prefix`/opt/qt@5 \
@@ -417,13 +418,14 @@ jobs:
         with:
           name: tarball-debian-11-tarball
       - name: Extract sources from tarball
-        run: mkdir src && tar xf transmission*.tar.* -C src --strip-components 1
+        run: mkdir src && tar xvf transmission*.tar.* -C src --strip-components 1
       - name: Configure
         run: |
           cmake \
             -S src \
             -B obj \
             -G Ninja \
+            -DCMAKE_BUILD_FLAGS='--trace-includes' \
             -DCMAKE_BUILD_TYPE=RelWithDebInfo \
             -DCMAKE_INSTALL_PREFIX=pfx \
             -DCMAKE_PREFIX_PATH=`brew --prefix`/opt/qt@5 \
