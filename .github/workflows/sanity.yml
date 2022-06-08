@@ -441,3 +441,78 @@ jobs:
         with:
           name: binaries-${{ github.job }}
           path: pfx/**/*
+  clang-tidy-and-sanitizers:
+    needs: make-src-tarball
+    runs-on: ubuntu-latest
+    steps:
+      - name: Prepare
+        run: |
+          set -ex
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            ca-certificates \
+            clang \
+            clang-tidy \
+            cmake \
+            gettext \
+            libcurl4-openssl-dev \
+            libdeflate-dev \
+            libevent-dev \
+            libfmt-dev \
+            libglibmm-2.4-dev \
+            libgtkmm-3.0-dev \
+            libminiupnpc-dev \
+            libnatpmp-dev \
+            libpsl-dev \
+            libssl-dev \
+            ninja-build \
+            `#nodejs` \
+            `#npm` \
+            qtbase5-dev \
+            qttools5-dev \
+            zlib1g-dev
+          `#npm install --global corepack`
+      - name: Download tarball
+        uses: actions/download-artifact@v3
+        with:
+          name: src-tarball
+      - name: Extract sources from tarball
+        run: mkdir src && tar xf transmission*.tar.* -C src --strip-components 1
+      - name: Configure
+        run: |
+          cmake \
+            -S src \
+            -B obj \
+            -G Ninja \
+            -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+            -DCMAKE_INSTALL_PREFIX=pfx \
+            -DENABLE_CLI=ON \
+            -DENABLE_GTK=ON \
+            -DENABLE_QT=ON \
+            `#-DENABLE_WEB=ON`
+      - name: Configure
+        run: |
+          cmake \
+            -S src \
+            -B obj \
+            -G Ninja \
+            -DCMAKE_BUILD_TYPE=Debug \
+            -DCMAKE_CXX_COMPILER='clang++' \
+            -DCMAKE_CXX_FLAGS='-gdwarf-4 -fno-omit-frame-pointer -fsanitize=address,leak,undefined' \
+            -DCMAKE_C_COMPILER='clang' \
+            -DCMAKE_C_FLAGS='-gdwarf-4 -fno-omit-frame-pointer -fsanitize=address,leak,undefined' \
+            -DCMAKE_INSTALL_PREFIX=pfx \
+            -DENABLE_CLI=ON \
+            -DENABLE_GTK=ON \
+            -DENABLE_QT=ON \
+            `#-DENABLE_WEB=ON`
+      - name: Build
+        run: cmake --build obj --config RelWithDebInfo
+      - name: Test
+        run: cmake -E chdir obj ctest --build-config RelWithDebInfo --output-on-failure
+      - name: Install
+        run: cmake --build obj --config RelWithDebInfo --target install/strip
+      - uses: actions/upload-artifact@v3
+        with:
+          name: binaries-${{ github.job }}
+          path: pfx/**/*
