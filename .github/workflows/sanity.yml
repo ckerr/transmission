@@ -441,7 +441,7 @@ jobs:
         with:
           name: binaries-${{ github.job }}
           path: pfx/**/*
-  clang-tidy-and-sanitizers:
+  libtransmission-test-asan:
     needs: make-src-tarball
     runs-on: ubuntu-22.04
     steps:
@@ -459,19 +459,11 @@ jobs:
             libdeflate-dev \
             libevent-dev \
             libfmt-dev \
-            libglibmm-2.4-dev \
-            libgtkmm-3.0-dev \
             libminiupnpc-dev \
             libnatpmp-dev \
             libpsl-dev \
             libssl-dev \
-            ninja-build \
-            `#nodejs` \
-            `#npm` \
-            qtbase5-dev \
-            qttools5-dev \
-            zlib1g-dev
-          `#npm install --global corepack`
+            ninja-build
       - name: Download tarball
         uses: actions/download-artifact@v3
         with:
@@ -490,16 +482,17 @@ jobs:
             -DCMAKE_C_COMPILER='clang' \
             -DCMAKE_C_FLAGS='-gdwarf-4 -fno-omit-frame-pointer -fsanitize=address,leak,undefined' \
             -DCMAKE_INSTALL_PREFIX=pfx \
-            -DENABLE_CLI=ON \
-            -DENABLE_GTK=ON \
-            -DENABLE_QT=ON \
+            -DENABLE_CLI=OFF \
+            -DENABLE_GTK=OFF \
+            -DENABLE_QT=OFF \
             `#-DENABLE_WEB=ON`
       - name: Build
-        run: cmake --build obj --config RelWithDebInfo
+        run: cmake --build obj --config Debug --target libtransmission-test
+        run: cmake --build obj --config Debug --target transmission-show
       - name: Test
         run: cmake -E chdir obj ctest --build-config Debug --output-on-failure
       - name: Install
-        run: cmake --build obj --config RelWithDebInfo --target install/strip
+        run: cmake --build obj --config Debug --target install/strip
       - uses: actions/upload-artifact@v3
         with:
           name: binaries-${{ github.job }}
