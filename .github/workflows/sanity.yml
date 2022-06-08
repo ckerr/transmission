@@ -487,8 +487,7 @@ jobs:
             -DENABLE_QT=OFF \
             `#-DENABLE_WEB=ON`
       - name: Build
-        run: cmake --build obj --config Debug --target libtransmission-test
-        run: cmake --build obj --config Debug --target transmission-show
+        run: cmake --build obj --config Debug --target libtransmission-test transmission-show
       - name: Test
         run: cmake -E chdir obj ctest --build-config Debug --output-on-failure
       - name: Install
