@@ -484,18 +484,6 @@ jobs:
             -S src \
             -B obj \
             -G Ninja \
-            -DCMAKE_BUILD_TYPE=RelWithDebInfo \
-            -DCMAKE_INSTALL_PREFIX=pfx \
-            -DENABLE_CLI=ON \
-            -DENABLE_GTK=ON \
-            -DENABLE_QT=ON \
-            `#-DENABLE_WEB=ON`
-      - name: Configure
-        run: |
-          cmake \
-            -S src \
-            -B obj \
-            -G Ninja \
             -DCMAKE_BUILD_TYPE=Debug \
             -DCMAKE_CXX_COMPILER='clang++' \
             -DCMAKE_CXX_FLAGS='-gdwarf-4 -fno-omit-frame-pointer -fsanitize=address,leak,undefined' \
@@ -509,7 +497,7 @@ jobs:
       - name: Build
         run: cmake --build obj --config RelWithDebInfo
       - name: Test
-        run: cmake -E chdir obj ctest --build-config RelWithDebInfo --output-on-failure
+        run: cmake -E chdir obj ctest --build-config Debug --output-on-failure
       - name: Install
         run: cmake --build obj --config RelWithDebInfo --target install/strip
       - uses: actions/upload-artifact@v3
