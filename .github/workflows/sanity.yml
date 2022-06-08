@@ -443,7 +443,7 @@ jobs:
           path: pfx/**/*
   clang-tidy-and-sanitizers:
     needs: make-src-tarball
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - name: Prepare
         run: |
