@@ -490,9 +490,3 @@ jobs:
         run: cmake --build obj --config Debug --target libtransmission-test transmission-show
       - name: Test
         run: cmake -E chdir obj ctest --build-config Debug --output-on-failure
-      - name: Install
-        run: cmake --build obj --config Debug --target install/strip
-      - uses: actions/upload-artifact@v3
-        with:
-          name: binaries-${{ github.job }}
-          path: pfx/**/*
