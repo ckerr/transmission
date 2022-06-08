@@ -73,8 +73,8 @@ jobs:
       - name: Prepare
         run: |
           set -ex
-          sudo apt-get update
-          sudo apt-get install -y --no-install-recommends \
+          apt-get update
+          apt-get install -y --no-install-recommends \
             ca-certificates \
             cmake \
             g++ \
@@ -244,7 +244,7 @@ jobs:
         with:
           name: binaries-${{ github.job }}
           path: pfx/**/*
-  transmission-src-tarball:
+  make-src-tarball:
     runs-on: ubuntu-latest
     steps:
       - name: Prepare
@@ -275,10 +275,10 @@ jobs:
         run: cmake --build obj --target package_source
       - uses: actions/upload-artifact@v3
         with:
-          name: tarball-${{ github.job }}
+          name: src-tarball
           path: obj/transmission*.tar.*
   debian-11-from-tarball:
-    needs: transmission-src-tarball
+    needs: make-src-tarball
     runs-on: ubuntu-latest
     container:
       image: debian:11-slim
@@ -314,7 +314,7 @@ jobs:
       - name: Download tarball
         uses: actions/download-artifact@v3
         with:
-          name: tarball-transmission-src-tarball
+          name: src-tarball
       - name: Extract sources from tarball
         run: mkdir src && tar xf transmission*.tar.* -C src --strip-components 1
       - name: Configure
@@ -366,14 +366,12 @@ jobs:
       - name: Configure
         run: |
           cmake \
+            -S src \
             -B obj \
             -G Ninja \
-            -S src \
-            -DCMAKE_BUILD_FLAGS='--trace-includes' \
             -DCMAKE_BUILD_TYPE=RelWithDebInfo \
             -DCMAKE_INSTALL_PREFIX=pfx \
             -DCMAKE_PREFIX_PATH=`brew --prefix`/opt/qt@5 \
-            -DCMAKE_VERBOSE_MAKEFILE=ON \
             -DENABLE_CLI=ON \
             -DENABLE_GTK=ON \
             -DENABLE_MAC=ON \
@@ -392,7 +390,7 @@ jobs:
           name: binaries-${{ github.job }}
           path: pfx/**/*
   macos-from-tarball:
-    needs: transmission-src-tarball
+    needs: make-src-tarball
     runs-on: macos-latest
     steps:
       - name: Prepare
@@ -414,20 +412,18 @@ jobs:
       - name: Download tarball
         uses: actions/download-artifact@v3
         with:
-          name: tarball-transmission-src-tarball
+          name: src-tarball
       - name: Extract sources from tarball
         run: mkdir src && tar xf transmission*.tar.* -C src --strip-components 1
       - name: Configure
         run: |
           cmake \
+            -S src \
             -B obj \
             -G Ninja \
-            -S src \
-            -DCMAKE_BUILD_FLAGS='--trace-includes' \
             -DCMAKE_BUILD_TYPE=RelWithDebInfo \
             -DCMAKE_INSTALL_PREFIX=pfx \
             -DCMAKE_PREFIX_PATH=`brew --prefix`/opt/qt@5 \
-            -DCMAKE_VERBOSE_MAKEFILE=ON \
             -DENABLE_CLI=ON \
             -DENABLE_GTK=ON \
             -DENABLE_MAC=ON \
