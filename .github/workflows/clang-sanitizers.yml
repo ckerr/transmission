@@ -1,0 +1,34 @@
+name: sanitizer-tests-clang
+on:
+  push:
+    paths:
+      - CMakeLists.txt
+      - libtransmission/**
+      - tests/**
+      - utils/**
+  pull_request:
+    types: [opened, reopened]
+    paths:
+      - CMakeLists.txt
+      - libtransmission/**
+      - tests/**
+      - utils/**
+env:
+  GTEST_OUTPUT: xml:./
+jobs:
+  sanitizer-tests-clang:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v3
+      - name: Checkout and Configure
+        uses: ./.github/actions/checkout-and-configure
+        with:
+          c: clang
+          c_flags: -gdwarf-4 -fno-omit-frame-pointer -fsanitize=address,leak,undefined
+          compiler_package_name: clang
+          cxx: clang++
+          cxx_flags: -gdwarf-4 -fno-omit-frame-pointer -fsanitize=address,leak,undefined
+      - name: Build
+        run: cmake --build obj --config Debug --target libtransmission-test transmission-show
+      - name: Test
+        run: cmake -E chdir obj ctest --build-config Debug --output-on-failure
