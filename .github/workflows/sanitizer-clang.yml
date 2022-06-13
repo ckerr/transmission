@@ -41,7 +41,7 @@ jobs:
           git -C "${GITHUB_WORKSPACE}/src" diff main -- CMakeLists.txt libtransmission tests third-party utils
           git -C "${GITHUB_WORKSPACE}/src" diff --quiet main -- CMakeLists.txt libtransmission tests third-party utils
           echo "::set-output name=changed::$?"
-      - configure:
+      - name: configure
         if: steps.test-for-diffs.outputs.changed == '1'
         run: |
           cmake \
@@ -58,9 +58,9 @@ jobs:
             -DENABLE_GTK=OFF \
             -DENABLE_QT=OFF \
             `#-DENABLE_WEB=ON`
-      - name: Build
+      - name: build
         if: steps.test-for-diffs.outputs.changed == '1'
         run: cmake --build build-clang --config Debug --target libtransmission-test transmission-show
-      - name: Test
+      - name: test
         if: steps.test-for-diffs.outputs.changed == '1'
         run: cmake -E chdir build-clang ctest --build-config Debug --output-on-failure
