@@ -12,7 +12,23 @@ jobs:
   sanitizer-test-clang:
     runs-on: ubuntu-22.04
     steps:
+      - name: get-source
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          path: src
+          submodules: recursive
+      - name: test-for-diffs
+        run: |
+          set +e
+          git -C "${GITHUB_WORKSPACE}/src" diff origin/main -- CMakeLists.txt libtransmission tests third-party utils
+          git -C "${GITHUB_WORKSPACE}/src" diff --quiet origin/main -- CMakeLists.txt libtransmission tests third-party utils
+          echo "::set-output name=changed::$?"
+          set -e
+      - name: show-test-results
+        run: echo "${{ steps.test-for-diffs.outputs.changed }}"
       - name: get-deps 
+        if: steps.test-for-diffs.outputs.changed == '1'
         run: |
           set -ex
           sudo apt-get update
@@ -30,19 +46,6 @@ jobs:
             libpsl-dev \
             libssl-dev \
             ninja-build
-      - name: get-source
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-          path: src
-          submodules: recursive
-      - name: test-for-diffs
-        run: |
-          set +e
-          git -C "${GITHUB_WORKSPACE}/src" diff origin/main -- CMakeLists.txt libtransmission tests third-party utils
-          git -C "${GITHUB_WORKSPACE}/src" diff --quiet origin/main -- CMakeLists.txt libtransmission tests third-party utils
-          echo "::set-output name=changed::$?"
-          set -e
       - name: configure
         if: steps.test-for-diffs.outputs.changed == '1'
         run: |
