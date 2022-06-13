@@ -16,8 +16,23 @@ jobs:
       - name: Get Deps
         run: |
           sudo apt-get install clang-format-12 npm yarn
-      - name: Check
+      - name: Check for style diffs
+        id: check-for-diffs
         working-directory: .
         run: |
           ./code_style.sh
+          git diff > style.diffs
+          set +e
           git diff --exit-code
+          echo "::set-output name=have-diffs::$?"
+          set -e
+      - name: Upload Diffs
+        uses: actions/upload-artifact@v2
+        if: steps.check-for-diffs.have-diffs == '1'
+        with:
+          name: code-style-diffs
+          path: style.diffs
+      - name: Fail if diffs exist
+        if: steps.check-for-diffs.have-diffs == '1'
+        run: |
+          exit 1
