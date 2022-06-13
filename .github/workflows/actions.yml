@@ -11,7 +11,7 @@ env:
 jobs:
   is-main-push:
     runs-on: ubuntu-22.04
-    outputs: is-main-push: github.event_name == 'push' && github.ref_name == 'main'
+    outputs: is-main-push: ${{ github.event_name == 'push' }} && ${{ github.ref_name == 'main' }}
   diffs-check:
     runs-on: ubuntu-22.04
     outputs:
