@@ -11,20 +11,32 @@ env:
 jobs:
   is-main-push:
     runs-on: ubuntu-22.04
-    outputs: is-main-push: ${{ github.event_name == 'push' }} && ${{ github.ref_name == 'main' }}
+    outputs:
+      is-main-push:
+        value: ${{ github.event_name == 'push' }} && ${{ github.ref_name == 'main' }}
   diffs-check:
     runs-on: ubuntu-22.04
     outputs:
-      cli-changed: ${{ steps.diffs-check.outputs.cli-changed }}
-      code-changed: ${{ steps.diffs-check.outputs.code-changed }}
-      daemon-changed: ${{ steps.diffs-check.outputs.daemon-changed }}
-      docs-changed: ${{ steps.diffs-check.outputs.docs-changed }}
-      gtk-client-changed: ${{ steps.diffs-check.outputs.gtk-client-changed }}
-      mac-client-changed: ${{ steps.diffs-check.outputs.mac-client-changed }}
-      qt-client-changed: ${{ steps.diffs-check.outputs.qt-client-changed }}
-      tests-changed: ${{ steps.diffs-check.outputs.tests-changed }}
-      utils-changed: ${{ steps.diffs-check.outputs.utils-changed }}
-      web-client-changed: ${{ steps.diffs-check.outputs.web-client-changed }}
+      cli-changed:
+        value: ${{ steps.diffs-check.outputs.cli-changed }}
+      code-changed:
+        value: ${{ steps.diffs-check.outputs.code-changed }}
+      daemon-changed:
+        value: ${{ steps.diffs-check.outputs.daemon-changed }}
+      docs-changed:
+        value: ${{ steps.diffs-check.outputs.docs-changed }}
+      gtk-client-changed:
+        value: ${{ steps.diffs-check.outputs.gtk-client-changed }}
+      mac-client-changed:
+        value: ${{ steps.diffs-check.outputs.mac-client-changed }}
+      qt-client-changed:
+        value: ${{ steps.diffs-check.outputs.qt-client-changed }}
+      tests-changed:
+        value: ${{ steps.diffs-check.outputs.tests-changed }}
+      utils-changed:
+        value: ${{ steps.diffs-check.outputs.utils-changed }}
+      web-client-changed:
+        value: ${{ steps.diffs-check.outputs.web-client-changed }}
     steps:
       - name: Get Source
         id: get-source
