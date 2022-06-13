@@ -17,8 +17,12 @@ jobs:
     steps:
       - name: Check State
         id: check-state
-        echo "name=is-main-push::${{ GITHUB_EVENT_NAME == 'push' }} && ${{ GITHUB_REF_NAME== 'main' }}"
-        echo "::set-output name=is-main-push::${{ GITHUB_EVENT_NAME == 'push' }} && ${{ GITHUB_REF_NAME== 'main' }}"
+        run: |
+          if [ "$GITHUB_EVENT_NAME" = 'push' ] && [ "$GITHUB_REF_NAME" = 'main' ]; then
+            echo 'name=is-main-push::1'
+          else
+            echo 'name=is-main-push::0'
+          fi
 
   diffs-check:
     runs-on: ubuntu-22.04
