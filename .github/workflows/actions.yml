@@ -19,9 +19,9 @@ jobs:
         id: check-state
         run: |
           if [ "$GITHUB_EVENT_NAME" = 'push' ] && [ "$GITHUB_REF_NAME" = 'main' ]; then
-            echo 'name=is-main-push::1'
+            echo '::set-output name=is-main-push::1'
           else
-            echo 'name=is-main-push::0'
+            echo '::set-output name=is-main-push::0'
           fi
 
   diffs-check:
