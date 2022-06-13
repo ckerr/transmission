@@ -207,3 +207,92 @@ jobs:
         with:
           name: binaries-${{ github.job }}
           path: pfx/**/*
+
+  make-src-tarball:
+￼   runs-on: ubuntu-22.04
+    needs: [ check-diffs, check-main-push ]
+    if: needs.check-main-push.outputs.is-main-push == '1' || needs.check-diffs.outputs.code-changed == '1'
+￼   steps:
+￼     - name: Get Deps
+￼        run: |
+￼          set -ex
+￼          sudo apt-get update
+￼          sudo apt-get install -y --no-install-recommends \
+￼            ca-certificates \
+￼            cmake \
+￼            g++ \
+￼            git \
+￼            libcurl4-openssl-dev \
+￼            libssl-dev \
+￼            ninja-build
+￼      - name: Get Source
+￼        uses: actions/checkout@v3
+￼        with:
+￼          path: src
+￼          submodules: recursive
+￼      - name: Configure
+￼        run: |
+￼          cmake \
+￼            -S src \
+￼            -B obj \
+￼            -G Ninja
+￼      - name: Create source tarball
+￼        run: cmake --build obj --target package_source
+￼      - uses: actions/upload-artifact@v3
+￼        with:
+￼          name: src-tarball
+￼          path: obj/transmission*.tar.*
+
+  macos-from-tarball:
+    needs: [ check-diffs, check-main-push, make-src-tarball ]
+    if: needs.check-main-push.outputs.is-main-push == '1' || needs.check-diffs.outputs.mac-client-changed == '1'
+￼   runs-on: macos-latest
+￼   steps:
+￼     - name: Get Deps
+￼       run: |
+￼         set -ex
+          brew install \
+            cmake \
+            gettext \
+            gtkmm3 \
+            libdeflate \
+            libevent \
+            libnatpmp \
+            libpsl \
+            miniupnpc \
+            ninja \
+            qt@5
+      - name: Get Source
+        uses: actions/download-artifact@v3
+        with:
+          name: src-tarball
+      - name: Extract sources from tarball
+        run: mkdir src && tar xf transmission*.tar.* -C src --strip-components 1
+      - name: Configure
+        run: |
+          cmake \
+           -S src \
+           -B obj \
+           -G Ninja \
+           -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+           -DCMAKE_INSTALL_PREFIX=pfx \
+           -DCMAKE_OSX_ARCHITECTURES='x86_64' \
+           -DCMAKE_OSX_DEPLOYMENT_TARGET='10.10' \
+           -DCMAKE_PREFIX_PATH=`brew --prefix`/opt/qt@5 \
+           -DENABLE_CLI=ON \
+           -DENABLE_GTK=ON \
+           -DENABLE_MAC=ON \
+           -DENABLE_QT=ON \
+           -DRUN_CLANG_TIDY=OFF
+      - name: Make
+        run: cmake --build obj --config RelWithDebInfo
+      - name: Test
+        env:
+          TMPDIR: /private/tmp
+        run: cmake -E chdir obj ctest --build-config RelWithDebInfo --output-on-failure
+      - name: Install
+        run: cmake --build obj --config RelWithDebInfo --target install/strip
+      - uses: actions/upload-artifact@v3
+        with:
+          name: binaries-${{ github.job }}
+          path: pfx/**/*
