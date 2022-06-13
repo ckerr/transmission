@@ -44,7 +44,7 @@ jobs:
     steps:
       - id: test-for-diffs-from-main
         run: |
-          git diff --quiet main -- CMakeLists.txt libtransmission tests third-party utils
+          git -C "${GITHUB_WORKSPACE}/src" diff --quiet main -- CMakeLists.txt libtransmission tests third-party utils
           echo "::set-output name=changed::$?"
   sanitizer-test-clang:
     runs-on: ubuntu-22.04
