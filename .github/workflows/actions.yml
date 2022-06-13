@@ -9,7 +9,7 @@ on:
 env:
   GTEST_OUTPUT: xml:./
 jobs:
-  is-main-push:
+  check-main-push:
     runs-on: ubuntu-22.04
     outputs:
       is-main-push: ${{ steps.check-state.outputs.is-main-push }}
@@ -23,19 +23,19 @@ jobs:
             echo "::set-output name=is-main-push::0"; \
           fi
 
-  diffs-check:
+  check-diffs:
     runs-on: ubuntu-22.04
     outputs:
-      cli-changed: ${{ steps.diffs-check.outputs.cli-changed }}
-      code-changed: ${{ steps.diffs-check.outputs.code-changed }}
-      daemon-changed: ${{ steps.diffs-check.outputs.daemon-changed }}
-      docs-changed: ${{ steps.diffs-check.outputs.docs-changed }}
-      gtk-client-changed: ${{ steps.diffs-check.outputs.gtk-client-changed }}
-      mac-client-changed: ${{ steps.diffs-check.outputs.mac-client-changed }}
-      qt-client-changed: ${{ steps.diffs-check.outputs.qt-client-changed }}
-      tests-changed: ${{ steps.diffs-check.outputs.tests-changed }}
-      utils-changed: ${{ steps.diffs-check.outputs.utils-changed }}
-      web-client-changed: ${{ steps.diffs-check.outputs.web-client-changed }}
+      cli-changed: ${{ steps.check-diffs.outputs.cli-changed }}
+      code-changed: ${{ steps.check-diffs.outputs.code-changed }}
+      daemon-changed: ${{ steps.check-diffs.outputs.daemon-changed }}
+      docs-changed: ${{ steps.check-diffs.outputs.docs-changed }}
+      gtk-client-changed: ${{ steps.check-diffs.outputs.gtk-client-changed }}
+      mac-client-changed: ${{ steps.check-diffs.outputs.mac-client-changed }}
+      qt-client-changed: ${{ steps.check-diffs.outputs.qt-client-changed }}
+      tests-changed: ${{ steps.check-diffs.outputs.tests-changed }}
+      utils-changed: ${{ steps.check-diffs.outputs.utils-changed }}
+      web-client-changed: ${{ steps.check-diffs.outputs.web-client-changed }}
     steps:
       - name: Get Source
         id: get-source
@@ -45,7 +45,7 @@ jobs:
           path: src
           submodules: recursive
       - name: Check for diffs
-        id: diffs-check
+        id: check-diffs
         run: |
           set +e
           git -C "${GITHUB_WORKSPACE}/src" diff --quiet origin/main -- CMakeLists.txt third-party libtransmission cli
@@ -72,8 +72,8 @@ jobs:
 
   code-style:
     runs-on: ubuntu-22.04
-    needs: [ is-main-push, diffs-check ]
-    if: needs.is-main-push.outputs.is-main-push == '1' || needs.diffs-check.outputs.code-changed == '1'
+    needs: [ check-diffs, check-main-push ]
+    if: needs.check-main-push.outputs.is-main-push == '1' || needs.check-diffs.outputs.code-changed == '1'
     steps:
       - name: Canary
         run: |
@@ -108,8 +108,8 @@ jobs:
 
   sanitizer-tests:
     runs-on: ubuntu-22.04
-    needs: [ is-main-push, diffs-check ]
-    if: needs.is-main-push.outputs.is-main-push == '1' || needs.diffs-check.outputs.tests-changed == '1'
+    needs: [ check-diffs, check-main-push ]
+    if: needs.is-main-push.outputs.is-main-push == '1' || needs.check-diffs.outputs.tests-changed == '1'
     steps:
       - name: Get Deps
         run: |
@@ -149,7 +149,7 @@ jobs:
             -DENABLE_CLI=OFF \
             -DENABLE_GTK=OFF \
             -DENABLE_QT=OFF \
-            `#-DENABLE_WEB=ON`
+            -DRUN_CLANG_TIDY=OFF
       - name: Make
         run: cmake --build obj --config Debug --target libtransmission-test transmission-show
       - name: Test with sanitizers
@@ -157,8 +157,8 @@ jobs:
 
   macos:
     runs-on: macos-latest
-    needs: [ is-main-push, diffs-check ]
-    if: needs.is-main-push.outputs.is-main-push == '1' || needs.diffs-check.outputs.mac-client-changed == '1'
+    needs: [ check-diffs, check-main-push ]
+    if: needs.check-main-push.outputs.is-main-push == '1' || needs.check-diffs.outputs.mac-client-changed == '1'
     steps:
       - name: Get Deps
         run: |
@@ -193,7 +193,8 @@ jobs:
             -DENABLE_CLI=ON \
             -DENABLE_GTK=ON \
             -DENABLE_MAC=ON \
-            -DENABLE_QT=ON
+            -DENABLE_QT=ON \
+            -DRUN_CLANG_TIDY=OFF
       - name: Make
         run: cmake --build obj --config RelWithDebInfo
       - name: Test
