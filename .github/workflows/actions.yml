@@ -13,15 +13,15 @@ jobs:
     runs-on: ubuntu-22.04
     outputs:
       is-main-push:
-        value: ${{ steps.check-state.is-main-push }}
+        value: ${{ steps.check-state.outputs.is-main-push }}
     steps:
       - name: Check State
         id: check-state
         run: |
-          if [ "$GITHUB_EVENT_NAME" = 'push' ] && [ "$GITHUB_REF_NAME" = 'main' ]; then
-            echo '::set-output name=is-main-push::1'
-          else
-            echo '::set-output name=is-main-push::0'
+          if [ "$GITHUB_EVENT_NAME" = 'push' ] && [ "$GITHUB_REF_NAME" = 'main' ]; then \
+            echo '::set-output name=is-main-push::1' \
+          else \
+            echo '::set-output name=is-main-push::0' \
           fi
 
   diffs-check:
