@@ -13,7 +13,13 @@ jobs:
     runs-on: ubuntu-22.04
     outputs:
       is-main-push:
-        value: ${{ github.event_name == 'push' }} && ${{ github.ref_name == 'main' }}
+        value: ${{ steps.check-state.is-main-push }}
+    steps:
+      - name: Check State
+        id: check-state
+        echo "name=is-main-push::${{ GITHUB_EVENT_NAME == 'push' }} && ${{ GITHUB_REF_NAME== 'main' }}"
+        echo "::set-output name=is-main-push::${{ GITHUB_EVENT_NAME == 'push' }} && ${{ GITHUB_REF_NAME== 'main' }}"
+
   diffs-check:
     runs-on: ubuntu-22.04
     outputs:
@@ -74,7 +80,7 @@ jobs:
   code-style:
     runs-on: ubuntu-22.04
     needs: [ is-main-push, diffs-check ]
-    if: needs.outputs.is-main-push == '1' || needs.outputs.code-changed == '1'
+    if: needs.is-main-push.outputs.is-main-push == '1' || needs.diffs-check.outputs.code-changed == '1'
     steps:
       - name: Canary
         run: |
@@ -110,7 +116,7 @@ jobs:
   sanitizer-tests:
     runs-on: ubuntu-22.04
     needs: [ is-main-push, diffs-check ]
-    if: needs.outputs.is-main-push == '1' || needs.outputs.tests-changed == '1'
+    if: needs.is-main-push.outputs.is-main-push == '1' || needs.diffs-check.outputs.tests-changed == '1'
     steps:
       - name: Get Deps
         run: |
