@@ -154,3 +154,55 @@ jobs:
         run: cmake --build obj --config Debug --target libtransmission-test transmission-show
       - name: Test with sanitizers
         run: cmake -E chdir obj ctest --build-config Debug --output-on-failure
+
+  macos:
+    runs-on: macos-latest
+    needs: [ is-main-push, diffs-check ]
+    if: needs.is-main-push.outputs.is-main-push == '1' || needs.diffs-check.outputs.mac-client-changed == '1'
+    steps:
+      - name: Get Deps
+        run: |
+          set -ex
+          brew install \
+            cmake \
+            gettext \
+            gtkmm3 \
+            libdeflate \
+            libevent \
+            libnatpmp \
+            libpsl \
+            miniupnpc \
+            ninja \
+            qt@5
+      - name: Get Source
+        uses: actions/checkout@v3
+        with:
+          path: src
+          submodules: recursive
+      - name: Configure
+        run: |
+          cmake \
+            -S src \
+            -B obj \
+            -G Ninja \
+            -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+            -DCMAKE_INSTALL_PREFIX=pfx \
+            -DCMAKE_OSX_ARCHITECTURES='x86_64;arm64' \
+            -DCMAKE_OSX_DEPLOYMENT_TARGET='10.10' \
+            -DCMAKE_PREFIX_PATH=`brew --prefix`/opt/qt@5 \
+            -DENABLE_CLI=ON \
+            -DENABLE_GTK=ON \
+            -DENABLE_MAC=ON \
+            -DENABLE_QT=ON
+      - name: Make
+        run: cmake --build obj --config RelWithDebInfo
+      - name: Test
+        env:
+          TMPDIR: /private/tmp
+        run: cmake -E chdir obj ctest --build-config RelWithDebInfo --output-on-failure
+      - name: Install
+        run: cmake --build obj --config RelWithDebInfo --target install/strip
+      - uses: actions/upload-artifact@v3
+        with:
+          name: binaries-${{ github.job }}
+          path: pfx/**/*
