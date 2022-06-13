@@ -23,8 +23,7 @@
 #include "tr-assert.h"
 #include "trevent.h"
 
-Cache::Key Cache::makeKey(tr_torrent const* torrent, tr_block_info::Location loc) noexcept
-{
+Cache::Key Cache::makeKey(tr_torrent const* torrent, tr_block_info::Location loc) noexcept {
     return std::make_pair(torrent->uniqueId, loc.block);
 }
 
