@@ -21,9 +21,8 @@ jobs:
         working-directory: .
         run: |
           ./code_style.sh
-          git diff > style.diffs
           set +e
-          git diff --exit-code
+          git diff --exit-code > style.diffs
           echo "::set-output name=have-diffs::$?"
           set -e
       - name: Upload Diffs
