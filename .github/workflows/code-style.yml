@@ -22,15 +22,16 @@ jobs:
         run: |
           ./code_style.sh
           set +e
-          git diff --exit-code > style.diffs
+          git diff --exit-code > style.diff
           echo "::set-output name=have-diffs::$?"
+          cat style.diff
           set -e
       - name: Upload Diffs
         uses: actions/upload-artifact@v2
         if: steps.check-for-diffs.have-diffs == '1'
         with:
-          name: code-style-diffs
-          path: style.diffs
+          name: code-style.diff
+          path: 'style.diff'
       - name: Fail if diffs exist
         if: steps.check-for-diffs.have-diffs == '1'
         run: |
