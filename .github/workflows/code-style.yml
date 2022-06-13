@@ -9,15 +9,15 @@ jobs:
     name: Formatting Check
     runs-on: ubuntu-latest
     steps:
-      - name: Install Dependencies
-        run: |
-          sudo apt-get install clang-format-12 npm yarn
-      - name: Checkout
+      - name: Get Source
         uses: actions/checkout@v3
         with:
           submodules: recursive
+      - name: Get Deps
+        run: |
+          sudo apt-get install clang-format-12 npm yarn
       - name: Check
         working-directory: .
         run: |
           ./code_style.sh
-          git diff
+          git diff --exit-code
