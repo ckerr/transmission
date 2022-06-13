@@ -129,6 +129,11 @@ jobs:
             libpsl-dev \
             libssl-dev \
             ninja-build
+      - name: Get Source
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+          path: src
       - name: Configure
         run: |
           cmake \
