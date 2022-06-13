@@ -12,25 +12,21 @@ jobs:
   sanitizer-test-clang:
     runs-on: ubuntu-22.04
     steps:
-      - name: get-source
+      - id: get-source
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
           path: src
           submodules: recursive
-      - name: test-for-diffs
-        id: test-for-diffs
+      - id: do-diffs-affect-tests
         run: |
           set +e
           git -C "${GITHUB_WORKSPACE}/src" diff origin/main -- CMakeLists.txt libtransmission tests third-party utils
           git -C "${GITHUB_WORKSPACE}/src" diff --quiet origin/main -- CMakeLists.txt libtransmission tests third-party utils
           echo "::set-output name=changed::$?"
-          echo "hello set-output name=changed::$?"
           set -e
-      - name: show-test-results
-        run: echo "${{ steps.test-for-diffs.outputs.changed }}"
-      - name: get-deps 
-        if: steps.test-for-diffs.outputs.changed == '1'
+      - id: get-deps
+        if: (steps.do-diffs-affect-tests.outputs.changed == '1') || (github.event_name == 'push' && github.ref_name == 'main')
         run: |
           set -ex
           sudo apt-get update
@@ -48,12 +44,12 @@ jobs:
             libpsl-dev \
             libssl-dev \
             ninja-build
-      - name: configure
-        if: steps.test-for-diffs.outputs.changed == '1'
+      - id: configure
+        if: (steps.do-diffs-affect-tests.outputs.changed == '1') || (github.event_name == 'push' && github.ref_name == 'main')
         run: |
           cmake \
             -S src \
-            -B build-clang \
+            -B obj \
             -G Ninja \
             -DCMAKE_BUILD_TYPE=Debug \
             -DCMAKE_CXX_COMPILER='clang++' \
@@ -65,9 +61,9 @@ jobs:
             -DENABLE_GTK=OFF \
             -DENABLE_QT=OFF \
             `#-DENABLE_WEB=ON`
-      - name: build
-        if: steps.test-for-diffs.outputs.changed == '1'
-        run: cmake --build build-clang --config Debug --target libtransmission-test transmission-show
-      - name: test
-        if: steps.test-for-diffs.outputs.changed == '1'
-        run: cmake -E chdir build-clang ctest --build-config Debug --output-on-failure
+      - id: build
+        if: (steps.do-diffs-affect-tests.outputs.changed == '1') || (github.event_name == 'push' && github.ref_name == 'main')
+        run: cmake --build obj --config Debug --target libtransmission-test transmission-show
+      - id: test
+        if: (steps.do-diffs-affect-tests.outputs.changed == '1') || (github.event_name == 'push' && github.ref_name == 'main')
+        run: cmake -E chdir obj ctest --build-config Debug --output-on-failure
