@@ -220,8 +220,6 @@ jobs:
            sudo apt-get install -y --no-install-recommends \
              ca-certificates \
              cmake \
-             g++ \
-             git \
              libcurl4-openssl-dev \
              libssl-dev \
              ninja-build
