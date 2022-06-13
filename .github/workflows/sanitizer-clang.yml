@@ -12,20 +12,23 @@ jobs:
   sanitizer-test-clang:
     runs-on: ubuntu-22.04
     steps:
-      - id: get-source
+      - name: Get Source
+        id: get-source
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
           path: src
           submodules: recursive
-      - id: do-diffs-affect-tests
+      - name: Check for diffs that affect tests
+        id: do-diffs-affect-tests
         run: |
           set +e
           git -C "${GITHUB_WORKSPACE}/src" diff origin/main -- CMakeLists.txt libtransmission tests third-party utils
           git -C "${GITHUB_WORKSPACE}/src" diff --quiet origin/main -- CMakeLists.txt libtransmission tests third-party utils
           echo "::set-output name=changed::$?"
           set -e
-      - id: get-deps
+      - name: Get Deps
+        id: get-deps
         if: (steps.do-diffs-affect-tests.outputs.changed == '1') || (github.event_name == 'push' && github.ref_name == 'main')
         run: |
           set -ex
@@ -44,7 +47,8 @@ jobs:
             libpsl-dev \
             libssl-dev \
             ninja-build
-      - id: configure
+      - name: Configure
+        id: configure
         if: (steps.do-diffs-affect-tests.outputs.changed == '1') || (github.event_name == 'push' && github.ref_name == 'main')
         run: |
           cmake \
@@ -61,9 +65,11 @@ jobs:
             -DENABLE_GTK=OFF \
             -DENABLE_QT=OFF \
             `#-DENABLE_WEB=ON`
-      - id: build
+      - name: Build
+        id: build
         if: (steps.do-diffs-affect-tests.outputs.changed == '1') || (github.event_name == 'push' && github.ref_name == 'main')
         run: cmake --build obj --config Debug --target libtransmission-test transmission-show
-      - id: test
+      - name: Test
+        id: test
         if: (steps.do-diffs-affect-tests.outputs.changed == '1') || (github.event_name == 'push' && github.ref_name == 'main')
         run: cmake -E chdir obj ctest --build-config Debug --output-on-failure
