@@ -1,0 +1,140 @@
+name: Sanity
+on:
+  push:
+    branches:
+      - 'main'
+  pull_request:
+    branches:
+      - 'main'
+env:
+  GTEST_OUTPUT: xml:./
+jobs:
+  is-main-push:
+    runs-on: ubuntu-22.04
+    outputs: is-main-push: github.event_name == 'push' && github.ref_name == 'main'
+  diffs-check:
+    runs-on: ubuntu-22.04
+    outputs:
+      cli-changed: ${{ steps.diffs-check.outputs.cli-changed }}
+      code-changed: ${{ steps.diffs-check.outputs.code-changed }}
+      daemon-changed: ${{ steps.diffs-check.outputs.daemon-changed }}
+      docs-changed: ${{ steps.diffs-check.outputs.docs-changed }}
+      gtk-client-changed: ${{ steps.diffs-check.outputs.gtk-client-changed }}
+      mac-client-changed: ${{ steps.diffs-check.outputs.mac-client-changed }}
+      qt-client-changed: ${{ steps.diffs-check.outputs.qt-client-changed }}
+      tests-changed: ${{ steps.diffs-check.outputs.tests-changed }}
+      utils-changed: ${{ steps.diffs-check.outputs.utils-changed }}
+      web-client-changed: ${{ steps.diffs-check.outputs.web-client-changed }}
+    steps:
+      - name: Get Source
+        id: get-source
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          path: src
+          submodules: recursive
+      - name: Check for diffs
+        id: diffs-check
+        run: |
+          set +e
+          git -C "${GITHUB_WORKSPACE}/src" diff --quiet origin/main -- CMakeLists.txt third-party libtransmission cli
+          echo "::set-output name=cli-changed::$?"
+          git -C "${GITHUB_WORKSPACE}/src" diff --quiet origin/main -- CMakeLists.txt libtransmission cli daemon gtk macos qt utils tests web
+          echo "::set-output name=code-changed::$?"
+          git -C "${GITHUB_WORKSPACE}/src" diff --quiet origin/main -- CMakeLists.txt third-party libtransmission daemon
+          echo "::set-output name=daemon-changed::$?"
+          git -C "${GITHUB_WORKSPACE}/src" diff --quiet origin/main -- docs
+          echo "::set-output name=docs-changed::$?"
+          git -C "${GITHUB_WORKSPACE}/src" diff --quiet origin/main -- CMakeLists.txt third-party libtransmission gtk
+          echo "::set-output name=gtk-client-changed::$?"
+          git -C "${GITHUB_WORKSPACE}/src" diff --quiet origin/main -- CMakeLists.txt third-party libtransmission macosx Transmission.xcodeproj
+          echo "::set-output name=mac-client-changed::$?"
+          git -C "${GITHUB_WORKSPACE}/src" diff --quiet origin/main -- CMakeLists.txt third-party libtransmission qt
+          echo "::set-output name=qt-client-changed::$?"
+          git -C "${GITHUB_WORKSPACE}/src" diff --quiet origin/main -- CMakeLists.txt third-party libtransmission utils tests
+          echo "::set-output name=tests-changed::$?"
+          git -C "${GITHUB_WORKSPACE}/src" diff --quiet origin/main -- CMakeLists.txt third-party libtransmission utils
+          echo "::set-output name=utils-changed::$?"
+          git -C "${GITHUB_WORKSPACE}/src" diff --quiet origin/main -- CMakeLists.txt third-party libtransmission web
+          echo "::set-output name=web-client-changed::$?"
+          set -e
+
+  code-style:
+    runs-on: ubuntu-22.04
+    needs: [ is-main-push, diffs-check ]
+    if: needs.outputs.is-main-push == '1' || needs.outputs.code-changed == '1'
+    steps:
+      - name: Canary
+        run: |
+          echo '${{ toJSON(needs) }}'
+      - name: Get Source
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+      - name: Get Deps
+        run: |
+          sudo apt-get install clang-format-12 npm yarn
+      - name: Check for style diffs
+        id: check-for-diffs
+        working-directory: .
+        run: |
+          ./code_style.sh
+          set +e
+          git diff --exit-code > style.diff
+          echo "::set-output name=differs::$?"
+          cat style.diff
+          set -e
+      - name: Upload Diffs
+        uses: actions/upload-artifact@v2
+        if: steps.check-for-diffs.outputs.differs== '1'
+        with:
+          name: code-style.diff
+          path: 'style.diff'
+      - name: Fail if diffs exist
+        if: steps.check-for-diffs.outputs.differs == '1'
+        run: |
+          exit 1
+
+  sanitizer-tests:
+    runs-on: ubuntu-22.04
+    needs: [ is-main-push, diffs-check ]
+    if: needs.outputs.is-main-push == '1' || needs.outputs.tests-changed == '1'
+    steps:
+      - name: Get Deps
+        run: |
+          set -ex
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            ca-certificates \
+            clang \
+            cmake \
+            gettext \
+            libcurl4-openssl-dev \
+            libdeflate-dev \
+            libevent-dev \
+            libfmt-dev \
+            libminiupnpc-dev \
+            libnatpmp-dev \
+            libpsl-dev \
+            libssl-dev \
+            ninja-build
+      - name: Configure
+        run: |
+          cmake \
+            -S src \
+            -B obj \
+            -G Ninja \
+            -DCMAKE_BUILD_TYPE=Debug \
+            -DCMAKE_CXX_COMPILER='clang++' \
+            -DCMAKE_CXX_FLAGS='-gdwarf-4 -fno-omit-frame-pointer -fsanitize=address,leak,undefined' \
+            -DCMAKE_C_COMPILER='clang' \
+            -DCMAKE_C_FLAGS='-gdwarf-4 -fno-omit-frame-pointer -fsanitize=address,leak,undefined' \
+            -DCMAKE_INSTALL_PREFIX=pfx \
+            -DENABLE_CLI=OFF \
+            -DENABLE_GTK=OFF \
+            -DENABLE_QT=OFF \
+            `#-DENABLE_WEB=ON`
+      - name: Make
+        run: cmake --build obj --config Debug --target libtransmission-test transmission-show
+      - name: Test with sanitizers
+        run: cmake -E chdir obj ctest --build-config Debug --output-on-failure
