@@ -209,36 +209,36 @@ jobs:
           path: pfx/**/*
 
   make-src-tarball:
-￼   runs-on: ubuntu-22.04
+    runs-on: ubuntu-22.04
     needs: [ check-diffs, check-main-push ]
     if: needs.check-main-push.outputs.is-main-push == '1' || needs.check-diffs.outputs.code-changed == '1'
 ￼   steps:
 ￼     - name: Get Deps
 ￼        run: |
-￼          set -ex
-￼          sudo apt-get update
-￼          sudo apt-get install -y --no-install-recommends \
-￼            ca-certificates \
-￼            cmake \
-￼            g++ \
-￼            git \
-￼            libcurl4-openssl-dev \
-￼            libssl-dev \
-￼            ninja-build
-￼      - name: Get Source
-￼        uses: actions/checkout@v3
-￼        with:
+           set -ex
+           sudo apt-get update
+           sudo apt-get install -y --no-install-recommends \
+             ca-certificates \
+             cmake \
+             g++ \
+             git \
+             libcurl4-openssl-dev \
+             libssl-dev \
+             ninja-build
+       - name: Get Source
+         uses: actions/checkout@v3
+         with:
 ￼          path: src
 ￼          submodules: recursive
-￼      - name: Configure
-￼        run: |
-￼          cmake \
-￼            -S src \
-￼            -B obj \
-￼            -G Ninja
-￼      - name: Create source tarball
-￼        run: cmake --build obj --target package_source
-￼      - uses: actions/upload-artifact@v3
+       - name: Configure
+         run: |
+           cmake \
+             -S src \
+             -B obj \
+             -G Ninja
+       - name: Create source tarball
+         run: cmake --build obj --target package_source
+       - uses: actions/upload-artifact@v3
 ￼        with:
 ￼          name: src-tarball
 ￼          path: obj/transmission*.tar.*
