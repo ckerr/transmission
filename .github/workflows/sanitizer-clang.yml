@@ -23,8 +23,7 @@ jobs:
         id: do-diffs-affect-tests
         run: |
           set +e
-          git -C "${GITHUB_WORKSPACE}/src" diff origin/main -- CMakeLists.txt libtransmission tests third-party utils
-          git -C "${GITHUB_WORKSPACE}/src" diff --quiet origin/main -- CMakeLists.txt libtransmission tests third-party utils
+          git -C "${GITHUB_WORKSPACE}/src" diff --exit-code origin/main -- CMakeLists.txt libtransmission tests third-party utils
           echo "::set-output name=changed::$?"
           set -e
       - name: Get Deps
@@ -65,11 +64,11 @@ jobs:
             -DENABLE_GTK=OFF \
             -DENABLE_QT=OFF \
             `#-DENABLE_WEB=ON`
-      - name: Build
-        id: build
+      - name: Make
+        id: make
         if: (steps.do-diffs-affect-tests.outputs.changed == '1') || (github.event_name == 'push' && github.ref_name == 'main')
         run: cmake --build obj --config Debug --target libtransmission-test transmission-show
-      - name: Test
+      - name: Test with sanitizers
         id: test
         if: (steps.do-diffs-affect-tests.outputs.changed == '1') || (github.event_name == 'push' && github.ref_name == 'main')
         run: cmake -E chdir obj ctest --build-config Debug --output-on-failure
