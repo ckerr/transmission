@@ -30,12 +30,12 @@ jobs:
       code-changed: ${{ steps.check-diffs.outputs.code-changed }}
       daemon-changed: ${{ steps.check-diffs.outputs.daemon-changed }}
       docs-changed: ${{ steps.check-diffs.outputs.docs-changed }}
-      gtk-client-changed: ${{ steps.check-diffs.outputs.gtk-client-changed }}
-      mac-client-changed: ${{ steps.check-diffs.outputs.mac-client-changed }}
-      qt-client-changed: ${{ steps.check-diffs.outputs.qt-client-changed }}
+      gtk-changed: ${{ steps.check-diffs.outputs.gtk-changed }}
+      mac-changed: ${{ steps.check-diffs.outputs.mac-changed }}
+      qt-changed: ${{ steps.check-diffs.outputs.qt-changed }}
       tests-changed: ${{ steps.check-diffs.outputs.tests-changed }}
       utils-changed: ${{ steps.check-diffs.outputs.utils-changed }}
-      web-client-changed: ${{ steps.check-diffs.outputs.web-client-changed }}
+      web-changed: ${{ steps.check-diffs.outputs.web-changed }}
     steps:
       - name: Get Source
         id: get-source
@@ -57,17 +57,17 @@ jobs:
           git -C "${GITHUB_WORKSPACE}/src" diff --quiet origin/main -- docs
           echo "::set-output name=docs-changed::$?"
           git -C "${GITHUB_WORKSPACE}/src" diff --quiet origin/main -- CMakeLists.txt third-party libtransmission gtk
-          echo "::set-output name=gtk-client-changed::$?"
+          echo "::set-output name=gtk-changed::$?"
           git -C "${GITHUB_WORKSPACE}/src" diff --quiet origin/main -- CMakeLists.txt third-party libtransmission macosx Transmission.xcodeproj
-          echo "::set-output name=mac-client-changed::$?"
+          echo "::set-output name=mac-changed::$?"
           git -C "${GITHUB_WORKSPACE}/src" diff --quiet origin/main -- CMakeLists.txt third-party libtransmission qt
-          echo "::set-output name=qt-client-changed::$?"
+          echo "::set-output name=qt-changed::$?"
           git -C "${GITHUB_WORKSPACE}/src" diff --quiet origin/main -- CMakeLists.txt third-party libtransmission utils tests
           echo "::set-output name=tests-changed::$?"
           git -C "${GITHUB_WORKSPACE}/src" diff --quiet origin/main -- CMakeLists.txt third-party libtransmission utils
           echo "::set-output name=utils-changed::$?"
           git -C "${GITHUB_WORKSPACE}/src" diff --quiet origin/main -- CMakeLists.txt third-party libtransmission web
-          echo "::set-output name=web-client-changed::$?"
+          echo "::set-output name=web-changed::$?"
           set -e
 
   what-to-build:
@@ -78,12 +78,12 @@ jobs:
       build-code: ${{ needs.check-main-push.outputs.is-main-push == '1' || needs.check-diffs.outputs.code-changed == '1' }}
       build-daemon: ${{ needs.check-main-push.outputs.is-main-push == '1' || needs.check-diffs.outputs.daemon-changed == '1' }}
       build-docs: ${{ needs.check-main-push.outputs.is-main-push == '1' || needs.check-diffs.outputs.docs-changed == '1' }}
-      build-gtk-client: ${{ needs.check-main-push.outputs.is-main-push == '1' || needs.check-diffs.outputs.gtk-client-changed == '1' }}
-      build-mac-client: ${{ needs.check-main-push.outputs.is-main-push == '1' || needs.check-diffs.outputs.mac-client-changed == '1' }}
-      build-qt-client: ${{ needs.check-main-push.outputs.is-main-push == '1' || needs.check-diffs.outputs.qt-client-changed == '1' }}
+      build-gtk: ${{ needs.check-main-push.outputs.is-main-push == '1' || needs.check-diffs.outputs.gtk-changed == '1' }}
+      build-mac: ${{ needs.check-main-push.outputs.is-main-push == '1' || needs.check-diffs.outputs.mac-changed == '1' }}
+      build-qt: ${{ needs.check-main-push.outputs.is-main-push == '1' || needs.check-diffs.outputs.qt-changed == '1' }}
       build-tests: ${{ needs.check-main-push.outputs.is-main-push == '1' || needs.check-diffs.outputs.tests-changed == '1' }}
       build-utils: ${{ needs.check-main-push.outputs.is-main-push == '1' || needs.check-diffs.outputs.utils-changed == '1' }}
-      build-web-client: ${{ needs.check-main-push.outputs.is-main-push == '1' || needs.check-diffs.outputs.web-client-changed == '1' }}
+      build-web: ${{ needs.check-main-push.outputs.is-main-push == '1' || needs.check-diffs.outputs.web-changed == '1' }}
     steps:
       - name: Canary
         run: |
@@ -116,7 +116,7 @@ jobs:
           set -e
       - name: Upload Diffs
         uses: actions/upload-artifact@v2
-        if: steps.check-for-diffs.outputs.differs== '1'
+        if: steps.check-for-diffs.outputs.differs == '1'
         with:
           name: code-style.diff
           path: 'style.diff'
@@ -177,7 +177,7 @@ jobs:
   macos:
     runs-on: macos-latest
     needs: [ what-to-build ]
-    if: needs.what-to-build.outputs.build-mac-client || needs.what-to-build.outputs.build-gtk-client || needs.what-to-build.output.build-cli || needs.what-to-build.outputs.build-qt-client
+    if: needs.what-to-build.outputs.build-cli || needs.what-to-build.outputs.build-gtk || needs.what-to-build.outputs.build-mac || needs.what-to-build.outputs.build-qt
     steps:
       - name: Get Dependencies
         run: |
@@ -262,7 +262,7 @@ jobs:
 
   macos-from-tarball:
     needs: [ make-src-tarball, what-to-build ]
-    if: needs.what-to-build.outputs.build-mac-client || needs.what-to-build.outputs.build-gtk-client || needs.what-to-build.output.build-cli || needs.what-to-build.outputs.build-qt-client
+    if: needs.what-to-build.outputs.build-code
     runs-on: macos-latest
     steps:
       - name: Get Dependencies
@@ -316,7 +316,7 @@ jobs:
 
   debian-11-from-tarball:
     needs: [ make-src-tarball, what-to-build ]
-    if: needs.what-to-build.outputs.build-mac-client || needs.what-to-build.outputs.build-gtk-client || needs.what-to-build.output.build-cli || needs.what-to-build.outputs.build-qt-client
+    if: needs.what-to-build.outputs.build-code
     runs-on: ubuntu-22.04
     container:
       image: debian:11-slim
@@ -361,7 +361,7 @@ jobs:
             -DCMAKE_INSTALL_PREFIX=pfx \
             -DENABLE_CLI=${{ needs.what-to-build.outputs.build-cli }} \
             -DENABLE_GTK=${{ needs.what-to-build.outputs.build-gtk }} \
-            -DENABLE_MAC=${{ needs.what-to-build.outputs.build-mac }}  \
+            -DENABLE_MAC=OFF \
             -DENABLE_QT=${{ needs.what-to-build.outputs.build-qt }} \
             -DRUN_CLANG_TIDY=OFF
       - name: Build
