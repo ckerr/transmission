@@ -198,10 +198,10 @@ jobs:
             -DENABLE_CLI=${{ (needs.what-to-build.outputs.build-cli == 'true') && 'ON' || 'OFF' }} \
             -DENABLE_DAEMON=${{ (needs.what-to-build.outputs.build-daemon == 'true') && 'ON' || 'OFF' }} \
             -DENABLE_GTK=${{ (needs.what-to-build.outputs.build-gtk == 'true') && 'ON' || 'OFF' }} \
-            -DENABLE_MAC=${{ needs.what-to-build.outputs.build-mac == 'true') && 'ON' || 'OFF' }}  \
-            -DENABLE_QT=${{ needs.what-to-build.outputs.build-qt == 'true') && 'ON' || 'OFF' }} \
+            -DENABLE_MAC=${{ (needs.what-to-build.outputs.build-mac == 'true') && 'ON' || 'OFF' }}  \
+            -DENABLE_QT=${{ (needs.what-to-build.outputs.build-qt == 'true') && 'ON' || 'OFF' }} \
             -DENABLE_TESTS=OFF \
-            -DENABLE_UTILS=${{ needs.what-to-build.outputs.build-utils == 'true') && 'ON' || 'OFF' }} \
+            -DENABLE_UTILS=${{ (needs.what-to-build.outputs.build-utils == 'true') && 'ON' || 'OFF' }} \
             -DENABLE_WEB=OFF \
             -DRUN_CLANG_TIDY=OFF
       - name: Make
