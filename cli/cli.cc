@@ -66,8 +66,8 @@ static sig_atomic_t manualUpdate = false;
 
 static char const* torrentPath = nullptr;
 
-static auto constexpr Options = std::array<tr_option, 19>{
-    { { 'b', "blocklist", "Enable peer blocklists", "b", false, nullptr },
+static auto constexpr Options = std::array<tr_option, 19>{ {
+    { 'b', "blocklist", "Enable peer blocklists", "b", false, nullptr },
       { 'B', "no-blocklist", "Disable peer blocklists", "B", false, nullptr },
       { 'd', "downlimit", "Set max download speed in " SPEED_K_STR, "d", true, "<speed>" },
       { 'D', "no-downlimit", "Don't limit the download speed", "D", false, nullptr },
