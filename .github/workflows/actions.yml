@@ -221,7 +221,7 @@ jobs:
             -DENABLE_QT=${{ needs.what-to-build.outputs.build-qt && 'ON' || 'OFF' }} \
             -DENABLE_TESTS=OFF \
             -DENABLE_UTILS=${{ needs.what-to-build.outputs.build-utils && 'ON' || 'OFF' }} \
-            -DENABLE_WEB=OFF
+            -DENABLE_WEB=OFF \
             -DRUN_CLANG_TIDY=OFF
       - name: Make
         run: cmake --build obj --config RelWithDebInfo
@@ -313,7 +313,7 @@ jobs:
             -DENABLE_QT=${{ needs.what-to-build.outputs.build-qt && 'ON' || 'OFF' }} \
             -DENABLE_TESTS=OFF \
             -DENABLE_UTILS=${{ needs.what-to-build.outputs.build-utils && 'ON' || 'OFF' }} \
-            -DENABLE_WEB=OFF
+            -DENABLE_WEB=OFF \
             -DRUN_CLANG_TIDY=OFF
       - name: Make
         run: cmake --build obj --config RelWithDebInfo
@@ -381,7 +381,7 @@ jobs:
             -DENABLE_QT=${{ needs.what-to-build.outputs.build-qt && 'ON' || 'OFF' }} \
             -DENABLE_TESTS=${{ needs.what-to-build.outputs.build-tests && 'ON' || 'OFF' }} \
             -DENABLE_UTILS=${{ needs.what-to-build.outputs.build-utils && 'ON' || 'OFF' }} \
-            -DENABLE_WEB=OFF
+            -DENABLE_WEB=OFF \
             -DRUN_CLANG_TIDY=OFF
       - name: Build
         run: cmake --build obj --config RelWithDebInfo
