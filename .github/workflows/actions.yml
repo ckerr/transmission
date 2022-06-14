@@ -171,7 +171,7 @@ jobs:
             -DENABLE_MAC=OFF \
             -DENABLE_QT=OFF \
             -DENABLE_TESTS=ON \
-            -DENABLE_UTILS=OFF \
+            -DENABLE_UTILS=ON \
             -DENABLE_WEB=OFF \
             -DRUN_CLANG_TIDY=OFF
       - name: Make
