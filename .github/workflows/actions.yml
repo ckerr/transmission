@@ -67,9 +67,9 @@ jobs:
   code-style:
     runs-on: ubuntu-22.04
     needs: [ what-to-build ]
-    if: ${{ needs.what-to-build.outputs.build-code }}
+    if: ${{ needs.what-to-build.outputs.build-code == 'true' }}
     steps:
-      - name: Canary
+      - name: Inputs
         run: |
           echo '${{ toJSON(needs) }}'
       - name: Get Source
@@ -103,7 +103,7 @@ jobs:
   sanitizer-tests:
     runs-on: ubuntu-22.04
     needs: [ what-to-build ]
-    if: ${{ needs.what-to-build.outputs.build-tests }}
+    if: ${{ needs.what-to-build.outputs.build-tests == 'true' }}
     steps:
       - name: Get Dependencies
         run: |
@@ -157,9 +157,9 @@ jobs:
   macos:
     runs-on: macos-latest
     needs: [ what-to-build ]
-    if: ${{ needs.what-to-build.outputs.build-cli || needs.what-to-build.outputs.build-daemon || needs.what-to-build.outputs.build-gtk || needs.what-to-build.outputs.build-mac || needs.what-to-build.outputs.build-qt || needs.what-to-build.outputs.build-utils }}
+    if: ${{ needs.what-to-build.outputs.build-code == 'true' }}
     steps:
-      - name: Canary
+      - name: Inputs 
         run: |
           echo '${{ toJSON(needs) }}'
       - name: Get Dependencies
@@ -218,7 +218,7 @@ jobs:
   make-source-tarball:
     runs-on: ubuntu-22.04
     needs: [ what-to-build ]
-    if: ${{ needs.what-to-build.outputs.build-code }}
+    if: ${{ needs.what-to-build.outputs.build-code == 'true' }}
     steps:
        - name: Get Dependencies
          run: |
@@ -250,7 +250,7 @@ jobs:
 
   macos-from-tarball:
     needs: [ make-source-tarball, what-to-build ]
-    if: ${{ needs.what-to-build.outputs.build-code }}
+    if: ${{ needs.what-to-build.outputs.build-code == 'true' }}
     runs-on: macos-latest
     steps:
       - name: Get Dependencies
@@ -309,7 +309,7 @@ jobs:
 
   debian-11-from-tarball:
     needs: [ make-source-tarball, what-to-build ]
-    if: ${{ needs.what-to-build.outputs.build-code }}
+    if: ${{ needs.what-to-build.outputs.build-code == 'true' }}
     runs-on: ubuntu-22.04
     container:
       image: debian:11-slim
