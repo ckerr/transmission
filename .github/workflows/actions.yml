@@ -12,7 +12,20 @@ jobs:
   check-main-push:
     runs-on: ubuntu-22.04
     outputs:
-      is-main-push: ${{ steps.check-state.outputs.is-main-push }}
+
+  what-to-build:
+    runs-on: ubuntu-22.04
+    outputs:
+      build-cli: ${{ steps.check-main-push.outputs.is-main-push == '1' || steps.check-diffs.outputs.cli-changed == '1' }}
+      build-code: ${{ steps.check-main-push.outputs.is-main-push == '1' || steps.check-diffs.outputs.code-changed == '1' }}
+      build-daemon: ${{ steps.check-main-push.outputs.is-main-push == '1' || steps.check-diffs.outputs.daemon-changed == '1' }}
+      build-docs: ${{ steps.check-main-push.outputs.is-main-push == '1' || steps.check-diffs.outputs.docs-changed == '1' }}
+      build-gtk: ${{ steps.check-main-push.outputs.is-main-push == '1' || steps.check-diffs.outputs.gtk-changed == '1' }}
+      build-mac: ${{ steps.check-main-push.outputs.is-main-push == '1' || steps.check-diffs.outputs.mac-changed == '1' }}
+      build-qt: ${{ steps.check-main-push.outputs.is-main-push == '1' || steps.check-diffs.outputs.qt-changed == '1' }}
+      build-tests: ${{ steps.check-main-push.outputs.is-main-push == '1' || steps.check-diffs.outputs.tests-changed == '1' }}
+      build-utils: ${{ steps.check-main-push.outputs.is-main-push == '1' || steps.check-diffs.outputs.utils-changed == '1' }}
+      build-web: ${{ steps.check-main-push.outputs.is-main-push == '1' || steps.check-diffs.outputs.web-changed == '1' }}
     steps:
       - name: Check State
         id: check-state
@@ -22,21 +35,6 @@ jobs:
           else \
             echo "::set-output name=is-main-push::0"; \
           fi
-
-  check-diffs:
-    runs-on: ubuntu-22.04
-    outputs:
-      cli-changed: ${{ steps.check-diffs.outputs.cli-changed }}
-      code-changed: ${{ steps.check-diffs.outputs.code-changed }}
-      daemon-changed: ${{ steps.check-diffs.outputs.daemon-changed }}
-      docs-changed: ${{ steps.check-diffs.outputs.docs-changed }}
-      gtk-changed: ${{ steps.check-diffs.outputs.gtk-changed }}
-      mac-changed: ${{ steps.check-diffs.outputs.mac-changed }}
-      qt-changed: ${{ steps.check-diffs.outputs.qt-changed }}
-      tests-changed: ${{ steps.check-diffs.outputs.tests-changed }}
-      utils-changed: ${{ steps.check-diffs.outputs.utils-changed }}
-      web-changed: ${{ steps.check-diffs.outputs.web-changed }}
-    steps:
       - name: Get Source
         id: get-source
         uses: actions/checkout@v3
@@ -69,25 +67,6 @@ jobs:
           git -C "${GITHUB_WORKSPACE}/src" diff --quiet origin/main -- CMakeLists.txt third-party libtransmission web
           echo "::set-output name=web-changed::$?"
           set -e
-
-  what-to-build:
-    runs-on: ubuntu-22.04
-    needs: [ check-diffs, check-main-push ]
-    outputs:
-      build-cli: ${{ needs.check-main-push.outputs.is-main-push == '1' || needs.check-diffs.outputs.cli-changed == '1' }}
-      build-code: ${{ needs.check-main-push.outputs.is-main-push == '1' || needs.check-diffs.outputs.code-changed == '1' }}
-      build-daemon: ${{ needs.check-main-push.outputs.is-main-push == '1' || needs.check-diffs.outputs.daemon-changed == '1' }}
-      build-docs: ${{ needs.check-main-push.outputs.is-main-push == '1' || needs.check-diffs.outputs.docs-changed == '1' }}
-      build-gtk: ${{ needs.check-main-push.outputs.is-main-push == '1' || needs.check-diffs.outputs.gtk-changed == '1' }}
-      build-mac: ${{ needs.check-main-push.outputs.is-main-push == '1' || needs.check-diffs.outputs.mac-changed == '1' }}
-      build-qt: ${{ needs.check-main-push.outputs.is-main-push == '1' || needs.check-diffs.outputs.qt-changed == '1' }}
-      build-tests: ${{ needs.check-main-push.outputs.is-main-push == '1' || needs.check-diffs.outputs.tests-changed == '1' }}
-      build-utils: ${{ needs.check-main-push.outputs.is-main-push == '1' || needs.check-diffs.outputs.utils-changed == '1' }}
-      build-web: ${{ needs.check-main-push.outputs.is-main-push == '1' || needs.check-diffs.outputs.web-changed == '1' }}
-    steps:
-      - name: Canary
-        run: |
-          echo '${{ toJSON(needs) }}'
 
   code-style:
     runs-on: ubuntu-22.04
