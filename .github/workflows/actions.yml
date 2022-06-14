@@ -72,7 +72,7 @@ jobs:
       - name: Show Configuration
         run: |
           echo '${{ toJSON(needs) }}'
-          lsb_release --all
+          cat /etc/os-release
       - name: Get Source
         uses: actions/checkout@v3
         with:
@@ -311,7 +311,7 @@ jobs:
       - name: Show Configuration
         run: |
           echo '${{ toJSON(needs) }}'
-          lsb_release --all
+          cat /etc/os-release
       - name: Get Dependencies
         run: |
           set -ex
