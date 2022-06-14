@@ -84,6 +84,10 @@ jobs:
       build-tests: ${{ needs.check-main-push.outputs.is-main-push == '1' || needs.check-diffs.outputs.tests-changed == '1' }}
       build-utils: ${{ needs.check-main-push.outputs.is-main-push == '1' || needs.check-diffs.outputs.utils-changed == '1' }}
       build-web-client: ${{ needs.check-main-push.outputs.is-main-push == '1' || needs.check-diffs.outputs.web-client-changed == '1' }}
+    steps:
+      - name: Canary
+        run: |
+          echo '${{ toJSON(needs) }}'
 
   code-style:
     runs-on: ubuntu-22.04
