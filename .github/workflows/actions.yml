@@ -9,10 +9,6 @@ on:
 env:
   GTEST_OUTPUT: xml:./
 jobs:
-  check-main-push:
-    runs-on: ubuntu-22.04
-    outputs:
-
   what-to-build:
     runs-on: ubuntu-22.04
     outputs:
