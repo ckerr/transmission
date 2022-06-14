@@ -209,10 +209,10 @@ jobs:
             -DCMAKE_OSX_ARCHITECTURES='x86_64' \
             -DCMAKE_OSX_DEPLOYMENT_TARGET='10.10' \
             -DCMAKE_PREFIX_PATH=`brew --prefix`/opt/qt@5 \
-            -DENABLE_CLI=${{ needs.what-to-build.outputs.build-cli }} \
-            -DENABLE_GTK=${{ needs.what-to-build.outputs.build-gtk }} \
-            -DENABLE_MAC=${{ needs.what-to-build.outputs.build-mac }}  \
-            -DENABLE_QT=${{ needs.what-to-build.outputs.build-qt }} \
+            -DENABLE_CLI=${{ needs.what-to-build.outputs.build-cli && 'ON' || 'OFF' }} \
+            -DENABLE_GTK=${{ needs.what-to-build.outputs.build-gtk && 'ON' || 'OFF' }} \
+            -DENABLE_MAC=${{ needs.what-to-build.outputs.build-mac && 'ON' || 'OFF' }}  \
+            -DENABLE_QT=${{ needs.what-to-build.outputs.build-qt && 'ON' || 'OFF' }} \
             -DRUN_CLANG_TIDY=OFF
       - name: Make
         run: cmake --build obj --config RelWithDebInfo
@@ -296,10 +296,10 @@ jobs:
             -DCMAKE_OSX_ARCHITECTURES='x86_64' \
             -DCMAKE_OSX_DEPLOYMENT_TARGET='10.10' \
             -DCMAKE_PREFIX_PATH=`brew --prefix`/opt/qt@5 \
-            -DENABLE_CLI=${{ needs.what-to-build.outputs.build-cli }} \
-            -DENABLE_GTK=${{ needs.what-to-build.outputs.build-gtk }} \
-            -DENABLE_MAC=${{ needs.what-to-build.outputs.build-mac }}  \
-            -DENABLE_QT=${{ needs.what-to-build.outputs.build-qt }} \
+            -DENABLE_CLI=${{ needs.what-to-build.outputs.build-cli && 'ON' || 'OFF' }} \
+            -DENABLE_GTK=${{ needs.what-to-build.outputs.build-gtk && 'ON' || 'OFF' }} \
+            -DENABLE_MAC=${{ needs.what-to-build.outputs.build-mac && 'ON' || 'OFF' }}  \
+            -DENABLE_QT=${{ needs.what-to-build.outputs.build-qt && 'ON' || 'OFF' }} \
             -DRUN_CLANG_TIDY=OFF
       - name: Make
         run: cmake --build obj --config RelWithDebInfo
@@ -359,10 +359,10 @@ jobs:
             -G Ninja \
             -DCMAKE_BUILD_TYPE=RelWithDebInfo \
             -DCMAKE_INSTALL_PREFIX=pfx \
-            -DENABLE_CLI=${{ needs.what-to-build.outputs.build-cli }} \
-            -DENABLE_GTK=${{ needs.what-to-build.outputs.build-gtk }} \
+            -DENABLE_CLI=${{ needs.what-to-build.outputs.build-cli && 'ON' || 'OFF' }} \
+            -DENABLE_GTK=${{ needs.what-to-build.outputs.build-gtk && 'ON' || 'OFF' }} \
             -DENABLE_MAC=OFF \
-            -DENABLE_QT=${{ needs.what-to-build.outputs.build-qt }} \
+            -DENABLE_QT=${{ needs.what-to-build.outputs.build-qt && 'ON' || 'OFF' }} \
             -DRUN_CLANG_TIDY=OFF
       - name: Build
         run: cmake --build obj --config RelWithDebInfo
