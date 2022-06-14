@@ -69,9 +69,10 @@ jobs:
     needs: [ what-to-build ]
     if: ${{ needs.what-to-build.outputs.build-code == 'true' }}
     steps:
-      - name: Inputs
+      - name: Show Configuration
         run: |
           echo '${{ toJSON(needs) }}'
+          lsb_release --all
       - name: Get Source
         uses: actions/checkout@v3
         with:
@@ -154,28 +155,23 @@ jobs:
       - name: Test with sanitizers
         run: cmake -E chdir obj ctest --build-config Debug --output-on-failure
 
-  macos:
-    runs-on: macos-latest
+  macos-11:
+    runs-on: macos-11
     needs: [ what-to-build ]
-    if: ${{ needs.what-to-build.outputs.build-code == 'true' }}
+    if: ${{ needs.what-to-build.outputs.build-cli == 'true' || needs.what-to-build.outputs.build-daemon == 'true' || needs.what-to-build.outputs.build-gtk == 'true' || needs.what-to-build.outputs.build-mac == 'true' || needs.what-to-build.outputs.build-qt == 'true' || needs.what-to-build.outputs.build-tests == 'true' || needs.what-to-build.outputs.build-utils == 'true' }}
     steps:
-      - name: Inputs 
+      - name: Show Configuration
         run: |
           echo '${{ toJSON(needs) }}'
+          sw_vers
       - name: Get Dependencies
-        run: |
-          set -ex
-          brew install \
-            cmake \
-            gettext \
-            gtkmm3 \
-            libdeflate \
-            libevent \
-            libnatpmp \
-            libpsl \
-            miniupnpc \
-            ninja \
-            qt@5
+        run: brew install cmake gettext libdeflate libevent libnatpmp libpsl miniupnpc ninja
+      - name: Get Dependencies (GTK)
+        if: ${{ needs.what-to-build.outputs.build-gtk == 'true' }}
+        run: brew install gtkmm3
+      - name: Get Dependencies (Qt)
+        if: ${{ needs.what-to-build.outputs.build-qt == 'true' }}
+        run: brew install qt@5
       - name: Get Source
         uses: actions/checkout@v3
         with:
@@ -204,7 +200,7 @@ jobs:
       - name: Make
         run: cmake --build obj --config RelWithDebInfo
       - name: Test
-        if: ${{ needs.what-to-build.outputs.build-tests }}
+        if: ${{ needs.what-to-build.outputs.build-tests == 'true' }}
         env:
           TMPDIR: /private/tmp
         run: cmake -E chdir obj ctest --build-config RelWithDebInfo --output-on-failure
@@ -248,25 +244,23 @@ jobs:
            name: source-tarball
            path: obj/transmission*.tar.*
 
-  macos-from-tarball:
+  macos-11-from-tarball:
     needs: [ make-source-tarball, what-to-build ]
-    if: ${{ needs.what-to-build.outputs.build-code == 'true' }}
-    runs-on: macos-latest
+    if: ${{ needs.what-to-build.outputs.build-cli == 'true' || needs.what-to-build.outputs.build-daemon == 'true' || needs.what-to-build.outputs.build-gtk == 'true' || needs.what-to-build.outputs.build-mac == 'true' || needs.what-to-build.outputs.build-qt == 'true' || needs.what-to-build.outputs.build-tests == 'true' || needs.what-to-build.outputs.build-utils == 'true' }}
+    runs-on: macos-11
     steps:
-      - name: Get Dependencies
+      - name: Show Configuration
         run: |
-          set -ex
-          brew install \
-            cmake \
-            gettext \
-            gtkmm3 \
-            libdeflate \
-            libevent \
-            libnatpmp \
-            libpsl \
-            miniupnpc \
-            ninja \
-            qt@5
+          echo '${{ toJSON(needs) }}'
+          sw_vers
+      - name: Get Dependencies
+        run: brew install cmake gettext libdeflate libevent libnatpmp libpsl miniupnpc ninja
+      - name: Get Dependencies (GTK)
+        if: ${{ needs.what-to-build.outputs.build-gtk == 'true' }}
+        run: brew install gtkmm3
+      - name: Get Dependencies (Qt)
+        if: ${{ needs.what-to-build.outputs.build-qt == 'true' }}
+        run: brew install qt@5
       - name: Get Source
         uses: actions/download-artifact@v3
         with:
@@ -296,7 +290,7 @@ jobs:
       - name: Make
         run: cmake --build obj --config RelWithDebInfo
       - name: Test
-        if: ${{ needs.what-to-build.outputs.build-tests }}
+        if: ${{ needs.what-to-build.outputs.build-tests == 'true' }}
         env:
           TMPDIR: /private/tmp
         run: cmake -E chdir obj ctest --build-config RelWithDebInfo --output-on-failure
@@ -309,11 +303,15 @@ jobs:
 
   debian-11-from-tarball:
     needs: [ make-source-tarball, what-to-build ]
-    if: ${{ needs.what-to-build.outputs.build-code == 'true' }}
+    if: ${{ needs.what-to-build.outputs.build-cli == 'true' || needs.what-to-build.outputs.build-daemon == 'true' || needs.what-to-build.outputs.build-gtk == 'true' || needs.what-to-build.outputs.build-mac == 'true' || needs.what-to-build.outputs.build-qt == 'true' || needs.what-to-build.outputs.build-tests == 'true' || needs.what-to-build.outputs.build-utils == 'true' }}
     runs-on: ubuntu-22.04
     container:
       image: debian:11-slim
     steps:
+      - name: Show Configuration
+        run: |
+          echo '${{ toJSON(needs) }}'
+          lsb_release --all
       - name: Get Dependencies
         run: |
           set -ex
@@ -323,21 +321,22 @@ jobs:
             cmake \
             g++ \
             gettext \
-            git \
             libcurl4-openssl-dev \
             libdeflate-dev \
             libevent-dev \
             libfmt-dev \
-            libglibmm-2.4-dev \
-            libgtkmm-3.0-dev \
             libminiupnpc-dev \
             libnatpmp-dev \
             libpsl-dev \
             libssl-dev \
             ninja-build \
-            qtbase5-dev \
-            qttools5-dev \
             xz-utils
+      - name: Get Dependencies (GTK)
+        if: ${{ needs.what-to-build.outputs.build-gtk == 'true' }}
+        run: apt-get install -y --no-install-recommends libglibmm-2.4-dev libgtkmm-3.0-dev
+      - name: Get Dependencies (Qt)
+        if: ${{ needs.what-to-build.outputs.build-qt == 'true' }}
+        run: apt-get install -y --no-install-recommends qtbase5-dev qttools5-dev
       - name: Get Source
         uses: actions/download-artifact@v3
         with:
@@ -364,7 +363,7 @@ jobs:
       - name: Build
         run: cmake --build obj --config RelWithDebInfo
       - name: Test
-        if: ${{ needs.what-to-build.outputs.build-tests }}
+        if: ${{ needs.what-to-build.outputs.build-tests == 'true' }}
         run: cmake -E chdir obj ctest --build-config RelWithDebInfo --output-on-failure
       - name: Install
         run: cmake --build obj --config RelWithDebInfo --target install/strip
