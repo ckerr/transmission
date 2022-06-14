@@ -195,13 +195,13 @@ jobs:
             -DCMAKE_OSX_ARCHITECTURES='x86_64' \
             -DCMAKE_OSX_DEPLOYMENT_TARGET='10.10' \
             -DCMAKE_PREFIX_PATH=`brew --prefix`/opt/qt@5 \
-            -DENABLE_CLI=${{ needs.what-to-build.outputs.build-cli && 'ON' || 'OFF' }} \
-            -DENABLE_DAEMON=${{ needs.what-to-build.outputs.build-daemon && 'ON' || 'OFF' }} \
-            -DENABLE_GTK=${{ needs.what-to-build.outputs.build-gtk && 'ON' || 'OFF' }} \
-            -DENABLE_MAC=${{ needs.what-to-build.outputs.build-mac && 'ON' || 'OFF' }}  \
-            -DENABLE_QT=${{ needs.what-to-build.outputs.build-qt && 'ON' || 'OFF' }} \
+            -DENABLE_CLI=${{ (needs.what-to-build.outputs.build-cli == 'true') && 'ON' || 'OFF' }} \
+            -DENABLE_DAEMON=${{ (needs.what-to-build.outputs.build-daemon == 'true') && 'ON' || 'OFF' }} \
+            -DENABLE_GTK=${{ (needs.what-to-build.outputs.build-gtk == 'true') && 'ON' || 'OFF' }} \
+            -DENABLE_MAC=${{ needs.what-to-build.outputs.build-mac == 'true') && 'ON' || 'OFF' }}  \
+            -DENABLE_QT=${{ needs.what-to-build.outputs.build-qt == 'true') && 'ON' || 'OFF' }} \
             -DENABLE_TESTS=OFF \
-            -DENABLE_UTILS=${{ needs.what-to-build.outputs.build-utils && 'ON' || 'OFF' }} \
+            -DENABLE_UTILS=${{ needs.what-to-build.outputs.build-utils == 'true') && 'ON' || 'OFF' }} \
             -DENABLE_WEB=OFF \
             -DRUN_CLANG_TIDY=OFF
       - name: Make
