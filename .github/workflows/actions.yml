@@ -67,7 +67,7 @@ jobs:
   code-style:
     runs-on: ubuntu-22.04
     needs: [ what-to-build ]
-    if: needs.what-to-build.outputs.build-code
+    if: ${{ needs.what-to-build.outputs.build-code }}
     steps:
       - name: Canary
         run: |
@@ -91,19 +91,19 @@ jobs:
           set -e
       - name: Upload Diffs
         uses: actions/upload-artifact@v2
-        if: steps.check-for-diffs.outputs.differs == '1'
+        if: ${{ steps.check-for-diffs.outputs.differs == '1' }}
         with:
           name: code-style.diff
           path: 'style.diff'
       - name: Fail if diffs exist
-        if: steps.check-for-diffs.outputs.differs == '1'
+        if: ${{ steps.check-for-diffs.outputs.differs == '1' }}
         run: |
           exit 1
 
   sanitizer-tests:
     runs-on: ubuntu-22.04
     needs: [ what-to-build ]
-    if: needs.what-to-build.outputs.build-tests
+    if: ${{ needs.what-to-build.outputs.build-tests }}
     steps:
       - name: Get Dependencies
         run: |
@@ -157,8 +157,11 @@ jobs:
   macos:
     runs-on: macos-latest
     needs: [ what-to-build ]
-    if: needs.what-to-build.outputs.build-cli || needs.what-to-build.outputs.build-gtk || needs.what-to-build.outputs.build-mac || needs.what-to-build.outputs.build-qt
+    if: ${{ needs.what-to-build.outputs.build-cli || needs.what-to-build.outputs.build-daemon || needs.what-to-build.outputs.build-gtk || needs.what-to-build.outputs.build-mac || needs.what-to-build.outputs.build-qt || needs.what-to-build.outputs.build-utils }}
     steps:
+      - name: Canary
+        run: |
+          echo '${{ toJSON(needs) }}'
       - name: Get Dependencies
         run: |
           set -ex
@@ -201,7 +204,7 @@ jobs:
       - name: Make
         run: cmake --build obj --config RelWithDebInfo
       - name: Test
-        if: needs.what-to-build.outputs.build-tests
+        if: ${{ needs.what-to-build.outputs.build-tests }}
         env:
           TMPDIR: /private/tmp
         run: cmake -E chdir obj ctest --build-config RelWithDebInfo --output-on-failure
@@ -215,7 +218,7 @@ jobs:
   make-source-tarball:
     runs-on: ubuntu-22.04
     needs: [ what-to-build ]
-    if: needs.what-to-build.outputs.build-code
+    if: ${{ needs.what-to-build.outputs.build-code }}
     steps:
        - name: Get Dependencies
          run: |
@@ -247,7 +250,7 @@ jobs:
 
   macos-from-tarball:
     needs: [ make-source-tarball, what-to-build ]
-    if: needs.what-to-build.outputs.build-code
+    if: ${{ needs.what-to-build.outputs.build-code }}
     runs-on: macos-latest
     steps:
       - name: Get Dependencies
@@ -293,7 +296,7 @@ jobs:
       - name: Make
         run: cmake --build obj --config RelWithDebInfo
       - name: Test
-        if: needs.what-to-build.outputs.build-tests
+        if: ${{ needs.what-to-build.outputs.build-tests }}
         env:
           TMPDIR: /private/tmp
         run: cmake -E chdir obj ctest --build-config RelWithDebInfo --output-on-failure
@@ -306,7 +309,7 @@ jobs:
 
   debian-11-from-tarball:
     needs: [ make-source-tarball, what-to-build ]
-    if: needs.what-to-build.outputs.build-code
+    if: ${{ needs.what-to-build.outputs.build-code }}
     runs-on: ubuntu-22.04
     container:
       image: debian:11-slim
@@ -361,7 +364,7 @@ jobs:
       - name: Build
         run: cmake --build obj --config RelWithDebInfo
       - name: Test
-        if: needs.what-to-build.outputs.build-tests
+        if: ${{ needs.what-to-build.outputs.build-tests }}
         run: cmake -E chdir obj ctest --build-config RelWithDebInfo --output-on-failure
       - name: Install
         run: cmake --build obj --config RelWithDebInfo --target install/strip
