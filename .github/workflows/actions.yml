@@ -234,20 +234,20 @@ jobs:
         run: |
           set -ex
           apk update
-          apk add --upgrade \
+          apk add \
             ca-certificates \
             cmake \
             g++ \
             gettext \
+            curl-dev \
             libcurl4-openssl-dev \
-            libdeflate-dev \
             libevent-dev \
             libfmt-dev \
             libminiupnpc-dev \
             libnatpmp-dev \
             libpsl-dev \
             libssl-dev \
-            ninja-build \
+            ninja \
             pkg-config \
             xz-utils
       - name: Get Dependencies (GTK)
