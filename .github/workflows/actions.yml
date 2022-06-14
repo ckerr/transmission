@@ -242,7 +242,7 @@ jobs:
             curl-dev \
             fmt-dev \
             libevent-dev \
-            psl \
+            libpsl \
             miniupnpc-dev \
             ninja \
             pkgconfig \
