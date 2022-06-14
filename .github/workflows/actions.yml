@@ -82,7 +82,7 @@ jobs:
         uses: actions/checkout@v3
         with:
           submodules: recursive
-      - name: Get Deps
+      - name: Get Dependencies
         run: |
           sudo apt-get install clang-format-12 npm yarn
       - name: Check for style diffs
@@ -111,7 +111,7 @@ jobs:
     needs: [ check-diffs, check-main-push ]
     if: needs.is-main-push.outputs.is-main-push == '1' || needs.check-diffs.outputs.tests-changed == '1'
     steps:
-      - name: Get Deps
+      - name: Get Dependencies
         run: |
           set -ex
           sudo apt-get update
@@ -160,7 +160,7 @@ jobs:
     needs: [ check-diffs, check-main-push ]
     if: needs.check-main-push.outputs.is-main-push == '1' || needs.check-diffs.outputs.mac-client-changed == '1'
     steps:
-      - name: Get Deps
+      - name: Get Dependencies
         run: |
           set -ex
           brew install \
@@ -213,7 +213,7 @@ jobs:
     needs: [ check-diffs, check-main-push ]
     if: needs.check-main-push.outputs.is-main-push == '1' || needs.check-diffs.outputs.code-changed == '1'
     steps:
-       - name: Get Deps
+       - name: Get Dependencies
          run: |
            set -ex
            sudo apt-get update
@@ -246,7 +246,7 @@ jobs:
     if: needs.check-main-push.outputs.is-main-push == '1' || needs.check-diffs.outputs.mac-client-changed == '1'
     runs-on: macos-latest
     steps:
-      - name: Get Deps
+      - name: Get Dependencies
         run: |
           set -ex
           brew install \
@@ -264,7 +264,7 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: src-tarball
-      - name: Extract sources from tarball
+      - name: Extract Source
         run: mkdir src && tar xf transmission*.tar.* -C src --strip-components 1
       - name: Configure
         run: |
@@ -287,6 +287,64 @@ jobs:
       - name: Test
         env:
           TMPDIR: /private/tmp
+        run: cmake -E chdir obj ctest --build-config RelWithDebInfo --output-on-failure
+      - name: Install
+        run: cmake --build obj --config RelWithDebInfo --target install/strip
+      - uses: actions/upload-artifact@v3
+        with:
+          name: binaries-${{ github.job }}
+          path: pfx/**/*
+
+  debian-11-from-tarball:
+    needs: make-src-tarball
+    runs-on: ubuntu-22.04
+    container:
+      image: debian:11-slim
+    steps:
+      - name: Get Dependencies
+        run: |
+          set -ex
+          apt-get update
+          apt-get install -y --no-install-recommends \
+            ca-certificates \
+            cmake \
+            g++ \
+            gettext \
+            git \
+            libcurl4-openssl-dev \
+            libdeflate-dev \
+            libevent-dev \
+            libfmt-dev \
+            libglibmm-2.4-dev \
+            libgtkmm-3.0-dev \
+            libminiupnpc-dev \
+            libnatpmp-dev \
+            libpsl-dev \
+            libssl-dev \
+            ninja-build \
+            qtbase5-dev \
+            qttools5-dev \
+            xz-utils
+      - name: Get Source
+        uses: actions/download-artifact@v3
+        with:
+          name: src-tarball
+      - name: Extract Source
+        run: mkdir src && tar xf transmission*.tar.* -C src --strip-components 1
+      - name: Configure
+        run: |
+          cmake \
+            -S src \
+            -B obj \
+            -G Ninja \
+            -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+            -DCMAKE_INSTALL_PREFIX=pfx \
+            -DENABLE_CLI=ON \
+            -DENABLE_GTK=ON \
+            -DENABLE_QT=ON
+      - name: Build
+        run: cmake --build obj --config RelWithDebInfo
+      - name: Test
         run: cmake -E chdir obj ctest --build-config RelWithDebInfo --output-on-failure
       - name: Install
         run: cmake --build obj --config RelWithDebInfo --target install/strip
