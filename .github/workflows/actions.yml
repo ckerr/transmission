@@ -240,16 +240,13 @@ jobs:
             g++ \
             gettext \
             curl-dev \
-            libcurl4-openssl-dev \
+            fmt-dev \
             libevent-dev \
-            libfmt-dev \
-            libminiupnpc-dev \
-            libnatpmp-dev \
-            libpsl-dev \
-            libssl-dev \
+            psl \
+            miniupnpc-dev \
             ninja \
-            pkg-config \
-            xz-utils
+            pkgconfig \
+            xz
       - name: Get Dependencies (GTK)
         if: ${{ needs.what-to-build.outputs.build-gtk == 'true' }}
         run: apk add --upgrade glibmm-dev gtkmm3-dev
@@ -269,8 +266,6 @@ jobs:
             -G Ninja \
             -DCMAKE_BUILD_TYPE=RelWithDebInfo \
             -DCMAKE_INSTALL_PREFIX=pfx \
-            -DCMAKE_OSX_ARCHITECTURES='x86_64' \
-            -DCMAKE_OSX_DEPLOYMENT_TARGET='10.10' \
             -DCMAKE_PREFIX_PATH=`brew --prefix`/opt/qt@5 \
             -DENABLE_CLI=${{ (needs.what-to-build.outputs.build-cli == 'true') && 'ON' || 'OFF' }} \
             -DENABLE_DAEMON=${{ (needs.what-to-build.outputs.build-daemon == 'true') && 'ON' || 'OFF' }} \
