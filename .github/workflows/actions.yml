@@ -239,6 +239,7 @@ jobs:
             cmake \
             g++ \
             gettext \
+            git \
             curl-dev \
             fmt-dev \
             libevent-dev \
