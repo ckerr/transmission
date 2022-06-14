@@ -219,11 +219,10 @@ jobs:
           path: pfx/**/*
 
   alpine-musl:
+    needs: [ what-to-build ]
     runs-on: ubuntu-22.04
     container:
       image: radupopescu/musl-builder
-    runs-on: macos-11
-    needs: [ what-to-build ]
     if: ${{ needs.what-to-build.outputs.build-cli == 'true' || needs.what-to-build.outputs.build-daemon == 'true' || needs.what-to-build.outputs.build-gtk == 'true' || needs.what-to-build.outputs.build-mac == 'true' || needs.what-to-build.outputs.build-qt == 'true' || needs.what-to-build.outputs.build-tests == 'true' || needs.what-to-build.outputs.build-utils == 'true' }}
     steps:
       - name: Show Configuration
