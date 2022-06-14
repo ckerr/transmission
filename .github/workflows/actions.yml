@@ -237,7 +237,7 @@ jobs:
           name: binaries-${{ github.job }}
           path: pfx/**/*
 
-  make-src-tarball:
+  make-source-tarball:
     runs-on: ubuntu-22.04
     needs: [ what-to-build ]
     if: needs.what-to-build.outputs.build-code
@@ -267,11 +267,11 @@ jobs:
          run: cmake --build obj --target package_source
        - uses: actions/upload-artifact@v3
          with:
-           name: src-tarball
+           name: source-tarball
            path: obj/transmission*.tar.*
 
   macos-from-tarball:
-    needs: [ make-src-tarball, what-to-build ]
+    needs: [ make-source-tarball, what-to-build ]
     if: needs.what-to-build.outputs.build-code
     runs-on: macos-latest
     steps:
@@ -292,7 +292,7 @@ jobs:
       - name: Get Source
         uses: actions/download-artifact@v3
         with:
-          name: src-tarball
+          name: source-tarball
       - name: Extract Source
         run: mkdir src && tar xf transmission*.tar.* -C src --strip-components 1
       - name: Configure
@@ -330,7 +330,7 @@ jobs:
           path: pfx/**/*
 
   debian-11-from-tarball:
-    needs: [ make-src-tarball, what-to-build ]
+    needs: [ make-source-tarball, what-to-build ]
     if: needs.what-to-build.outputs.build-code
     runs-on: ubuntu-22.04
     container:
@@ -363,7 +363,7 @@ jobs:
       - name: Get Source
         uses: actions/download-artifact@v3
         with:
-          name: src-tarball
+          name: source-tarball
       - name: Extract Source
         run: mkdir src && tar xf transmission*.tar.* -C src --strip-components 1
       - name: Configure
