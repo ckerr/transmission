@@ -96,6 +96,7 @@ jobs:
         run: |
           git fetch --quiet --depth=1 origin "$GITHUB_BASE_REF"
           set -e # abort if diff --exit-code fails
+          echo
           echo For security reasons, code submissions to generated files are not accepted. Please remove these files from your PR:
           git diff --exit-code --name-only --merge-base "origin/$GITHUB_BASE_REF" -- \
               web/public_html/transmission-app.js \
