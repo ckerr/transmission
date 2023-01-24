@@ -59,11 +59,10 @@ jobs:
         run: |
           set -x # echo all executed commands to the terminal
           set -e # abort if any command fails
-          cd web
-          npm install
-          npm run lint:fix
+          npm --prefix web install
+          npm --prefix web run lint:fix
           set +e # do not end the script if a cmd returns an exit code
-          git diff --exit-code . > style.diff
+          git diff --exit-code web > style.diff
           echo "differs=$?" >> $GITHUB_OUTPUT
           echo ===
           cat style.diff
