@@ -7,12 +7,12 @@ on:
     branches:
       - 'main'
 jobs:
-  what-to-do:
+  decide-what-jobs-to-run:
     runs-on: ubuntu-22.04
     outputs:
       test-style: ${{ steps.check-diffs.outputs.web-changed == '1' }}
-      test-artifacts: ${{ steps.check-diffs.outputs.web-changed == '1' && steps.check-main-push.outputs.is-main-push == '0'}}
-      update-artifacts: ${{ steps.check-diffs.outputs.web-changed == '1' && steps.check-main-push.outputs.is-main-push == '1'}}
+      test-generated-files: ${{ steps.check-diffs.outputs.web-changed == '1' && steps.check-main-push.outputs.is-main-push == '0'}}
+      update-generated-files: ${{ steps.check-diffs.outputs.web-changed == '1' && steps.check-main-push.outputs.is-main-push == '1'}}
     steps:
       - name: Show env
         run: |
@@ -46,8 +46,8 @@ jobs:
 
   code-style:
     runs-on: ubuntu-latest
-    needs: [ what-to-do ]
-    if: ${{ needs.what-to-do.outputs.test-style == 'true' }}
+    needs: [ decide-what-jobs-to-run ]
+    if: ${{ needs.decide-what-jobs-to-run.outputs.test-style == 'true' }}
     steps:
       - name: Get source
         uses: actions/checkout@v3
@@ -84,16 +84,16 @@ jobs:
           echo "When CI is done, the above patch will be uploaded as 'code-style.diff' to https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}/ ."
           exit 1
 
-  test-artifacts:
+  test-generated-files:
     runs-on: ubuntu-latest
-    needs: [ what-to-do ]
-    if: ${{ needs.what-to-do.outputs.test-artifacts == 'true' }}
+    needs: [ decide-what-jobs-to-run ]
+    if: ${{ needs.decide-what-jobs-to-run.outputs.test-generated-files == 'true' }}
     steps:
       - name: Get source
         uses: actions/checkout@v3
         with:
           fetch-depth: 2 # >1 needed for merge base
-      - name: Check for changes to artifacts
+      - name: Check for changes to generated files
         run: |
           git fetch --quiet --depth=1 origin "$GITHUB_BASE_REF"
           set -e # abort if diff --exit-code fails
@@ -107,10 +107,10 @@ jobs:
               web/public_html/transmission-app.js.map \
               web/public_html/transmission-app.js.LICENSE.txt
 
-  update-artifacts:
+  update-generated-files:
     runs-on: ubuntu-latest
-    needs: [ what-to-do ]
-    if: ${{ needs.what-to-do.outputs.update-artifacts == 'true' }}
+    needs: [ decide-what-jobs-to-run ]
+    if: ${{ needs.decide-what-jobs-to-run.outputs.update-generated-files == 'true' }}
     steps:
       - name: Make PR
         run: |
