@@ -39,7 +39,7 @@ jobs:
             local name="$1"
             shift
             if [ "$GITHUB_EVENT_NAME" = 'push' ] && [ "$GITHUB_REF_NAME" = 'main' ]; then
-              DIFF_TARGET="--name-only HEAD^"
+              DIFF_TARGET='--name-only HEAD^'
             else
               git fetch --depth=1 origin "$GITHUB_BASE_REF"
               DIFF_TARGET="--merge-base origin/$GITHUB_BASE_REF"
