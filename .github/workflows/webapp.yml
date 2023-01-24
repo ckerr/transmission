@@ -1,0 +1,103 @@
+name: WebAppPullChecker
+on:
+  push:
+    branches:
+      - 'main'
+  pull_request:
+    branches:
+      - 'main'
+jobs:
+  what-to-make:
+    runs-on: ubuntu-22.04
+    outputs:
+      test-style: ${{ steps.check-diffs.outputs.web-changed == '1' }}
+      test-artifacts: ${{ steps.check-diffs.outputs.web-changed == '1' && steps.check-main-push.outputs.is-main-push == '0'}}
+    steps:
+      - name: Check Push to Main Branch
+        id: check-main-push
+        run: |
+          set -x # echo all executed commands to the terminal
+          if [ "$GITHUB_EVENT_NAME" = 'push' ] && [ "$GITHUB_REF_NAME" = 'main' ]; then
+            echo is-main-push=1 >> "$GITHUB_OUTPUT"
+          else
+            echo is-main-push=0 >> "$GITHUB_OUTPUT"
+          fi
+      - name: Check for diffs
+        id: check-diffs
+        run: |
+          set -e # do not abort if any command returns a nonzero exit code
+          function get_changes() { # name, paths...
+            local name="$1"
+            shift
+            git diff --exit-code --merge-base "origin/${GITHUB_BASE_REF}" -- "$@"
+            echo "$name-changed=$?" >> "$GITHUB_OUTPUT"
+          }
+          get_changes web CMakeLists.txt web
+
+  code-style:
+    runs-on: ubuntu-latest
+    needs: [ what-to-make ]
+    if: ${{ needs.what-to-make.outputs.test-style == 'true' }}
+    env:
+      NODE_PATH: /usr/lib/nodejs:/usr/share/nodejs
+    steps:
+      - name: Get source
+        uses: actions/checkout@v3
+      - name: Get dependencies
+        run: |
+          set -x # echo all executed commands to the terminal
+          set -e # abort if any command fails
+          sudo apt-get install -y npm
+      - name: Check for style diffs
+        id: check-for-diffs
+        run: |
+          set -x # echo all executed commands to the terminal
+          set -e # abort if any command fails
+          cd web
+          npm install
+          npm run lint:fix
+          set +e # do not end the script if a cmd returns an exit code
+          git diff --exit-code . > style.diff
+          echo "differs=$?" >> $GITHUB_OUTPUT
+          cat style.diff
+          set -e # undo set +e
+      - name: Upload diffs
+        uses: actions/upload-artifact@v2
+        if: ${{ steps.check-for-diffs.outputs.differs == '1' }}
+        with:
+          name: code-style.diff
+          path: 'style.diff'
+      - name: Fail if diffs exist
+        if: ${{ steps.check-for-diffs.outputs.differs == '1' }}
+        run: |
+          echo "code style does not match expected."
+          cat style.diff
+          echo "When CI is done, the above patch will be uploaded as 'code-style.diff' to https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}/ ."
+          exit 1
+
+  omits-generated-files:
+    runs-on: ubuntu-latest
+    needs: [ what-to-make ]
+    if: ${{ needs.what-to-make.outputs.test-artifacts == 'true' }}
+    env:
+      NODE_PATH: /usr/lib/nodejs:/usr/share/nodejs
+    steps:
+      - name: Get source
+        uses: actions/checkout@v3
+      - name: Get dependencies
+        run: |
+          set -x # echo all executed commands to the terminal
+          set -e # abort if any command fails
+          sudo apt-get install -y npm
+      - name: Check for generated files
+        run: |
+          echo 'checking for changed generated files'
+          set +e # do not abort if any command fails
+          git diff --exit-code --name-only --merge-base "origin/${GITHUB_BASE_REF}" -- web/public-html/transmission-app*
+          echo "differs=$?" >> $GITHUB_OUTPUT
+          set -e
+      - name: Fail if generated files changed
+        if: ${{ steps.check-for-diffs.outputs.differs == '1' }}
+        run: |
+          echo "PR must not change generated files. Please remove these changes from the PR."
+          exit 1
