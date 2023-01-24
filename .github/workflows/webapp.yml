@@ -31,7 +31,8 @@ jobs:
         run: |
           set -x # echo all executed commands to the terminal
           #ls
-          git fetch --all
+          git fetch --depth=1 origin
+          #git fetch --all
           #git --no-pager log -n100
           #git merge-base "origin/$GITHUB_BASE_REF" HEAD
           #git branch --all
@@ -41,7 +42,7 @@ jobs:
             shift
             #echo "origin/$GITHUB_BASE_REF"
             #git --version
-            set -e # do not abort if --exit-code returns a nonzero exit code
+            set +e # do not abort if --exit-code returns a nonzero exit code
             git diff --exit-code --merge-base "origin/$GITHUB_BASE_REF" -- "$@"
             echo "$name-changed=$?" >> "$GITHUB_OUTPUT"
           }
