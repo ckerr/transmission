@@ -30,6 +30,9 @@ jobs:
         id: check-diffs
         run: |
           set -e # do not abort if any command returns a nonzero exit code
+          set -x # echo all executed commands to the terminal
+          git fetch --all
+          git branch --all
           function get_changes() { # name, paths...
             set -x # echo all executed commands to the terminal
             local name="$1"
