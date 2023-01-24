@@ -132,7 +132,8 @@ jobs:
           npm --prefix web ci
           npm --prefix web run lint:fix
           npm --prefix web run build
-          git diff --exit-code --name-only
+          git diff --name-only
+          git add --update web
       - name: Create pull request
         uses: peter-evans/create-pull-request@v4
         with:
