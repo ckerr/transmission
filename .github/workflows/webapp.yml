@@ -143,5 +143,5 @@ jobs:
           commit-message: 'chore: update generated transmission-web files'
           delete-branch: true
           title: 'chore: update generated transmission-web files'
-          body: Generated from https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/jobs/${{ github.job }}
+          body: Generated from https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
 
