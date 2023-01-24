@@ -44,8 +44,6 @@ jobs:
     runs-on: ubuntu-latest
     needs: [ what-to-make ]
     if: ${{ needs.what-to-make.outputs.test-style == 'true' }}
-    env:
-      NODE_PATH: /usr/lib/nodejs:/usr/share/nodejs
     steps:
       - name: Get source
         uses: actions/checkout@v3
@@ -86,25 +84,13 @@ jobs:
     runs-on: ubuntu-latest
     needs: [ what-to-make ]
     if: ${{ needs.what-to-make.outputs.test-artifacts == 'true' }}
-    env:
-      NODE_PATH: /usr/lib/nodejs:/usr/share/nodejs
     steps:
       - name: Get source
         uses: actions/checkout@v3
-      - name: Get dependencies
+      - name: Check for changes to generated files
         run: |
           set -x # echo all executed commands to the terminal
-          set -e # abort if any command fails
-          sudo apt-get install -y npm
-      - name: Check for generated files
-        run: |
-          echo 'checking for changed generated files'
-          set +e # do not abort if any command fails
-          git diff --exit-code --name-only --merge-base "origin/${GITHUB_BASE_REF}" -- web/public-html/transmission-app*
-          echo "differs=$?" >> $GITHUB_OUTPUT
-          set -e
-      - name: Fail if generated files changed
-        if: ${{ steps.check-for-diffs.outputs.differs == '1' }}
-        run: |
-          echo "PR must not change generated files. Please remove these changes from the PR."
-          exit 1
+          echo Checking for changes to generated files.
+          echo No files should be listed here. If any are, please remove them from your PR.
+          set -e # abort if diff --exit-code fails
+          git diff --exit-code --name-only -- web/public-html/transmission-app*
