@@ -133,7 +133,6 @@ jobs:
           set -x # echo all executed commands to the terminal
           set -e # abort if any command fails
           npm --prefix web ci
-          npm --prefix web run lint:fix
           npm --prefix web run build
           git diff --name-only
           git add --update web
@@ -144,5 +143,5 @@ jobs:
           commit-message: 'chore: update generated transmission-web files'
           delete-branch: true
           title: 'chore: update generated transmission-web files'
-          body: Generated from https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/ .
+          body: Generated from https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/jobs/${{ github.job }}
 
