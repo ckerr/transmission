@@ -34,6 +34,7 @@ jobs:
         id: check-diffs
         run: |
           git fetch --depth=1 origin "$GITHUB_BASE_REF"
+          git --no-pager log -n100
           set -x # echo all executed commands to the terminal
           function get_changes() { # name, paths...
             local name="$1"
