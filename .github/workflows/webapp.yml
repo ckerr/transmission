@@ -35,6 +35,7 @@ jobs:
           set -x # echo all executed commands to the terminal
           ls
           git fetch --all
+          git --no-pager log -n100
           git merge-base "origin/$GITHUB_BASE_REF" HEAD
           git branch --all
           function get_changes() { # name, paths...
