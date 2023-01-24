@@ -35,6 +35,7 @@ jobs:
             local name="$1"
             shift
             echo "origin/$GITHUB_BASE_REF"
+            git --version
             git diff --exit-code --merge-base "origin/$GITHUB_BASE_REF" -- "$@"
             echo "$name-changed=$?" >> "$GITHUB_OUTPUT"
           }
