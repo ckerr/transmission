@@ -41,7 +41,7 @@ jobs:
             if [ "$GITHUB_EVENT_NAME" = 'push' ] && [ "$GITHUB_REF_NAME" = 'main' ]; then
               DIFF_TGT="-only HEAD^"
             else
-              DIFF_TGT="--merge-base "origin/$GITHUB_BASE_REF"
+              DIFF_TGT="--merge-base origin/$GITHUB_BASE_REF"
             fi
             set +e # do not abort if git --exit-code returns nonzero
             git diff --exit-code ${DIFF_TGT} -- "$@"
