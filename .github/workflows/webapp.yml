@@ -15,7 +15,7 @@ jobs:
     steps:
       - name: Show environment
         run: |
-          env
+          env | sort
           git --version
       - name: Check Push to Main Branch
         id: check-main-push
@@ -31,8 +31,10 @@ jobs:
         run: |
           set -e # do not abort if any command returns a nonzero exit code
           function get_changes() { # name, paths...
+            set -x # echo all executed commands to the terminal
             local name="$1"
             shift
+            echo "origin/$GITHUB_BASE_REF"
             git diff --exit-code --merge-base "origin/$GITHUB_BASE_REF" -- "$@"
             echo "$name-changed=$?" >> "$GITHUB_OUTPUT"
           }
