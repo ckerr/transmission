@@ -9,7 +9,8 @@ export class Prefs extends EventTarget {
   constructor() {
     super();
 
-    this._cache = {};
+    this._cache = {
+    };
 
     this.dispatchPrefsChange = debounce((key, old_value, value) => {
       const event = new Event('change');
