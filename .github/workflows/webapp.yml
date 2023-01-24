@@ -94,10 +94,9 @@ jobs:
           fetch-depth: 2 # >1 needed for merge base
       - name: Check for changes to generated files
         run: |
-          set -x # echo all executed commands to the terminal
           git fetch --depth=1 origin "$GITHUB_BASE_REF"
-          echo For security reasons, code submissions to generated files are not accepted. Please remove these files from your PR:
           set -e # abort if diff --exit-code fails
+          echo For security reasons, code submissions to generated files are not accepted. Please remove these files from your PR:
           git diff --exit-code --name-only --merge-base "origin/$GITHUB_BASE_REF" -- \
               web/public_html/transmission-app.js \
               web/public_html/transmission-app.js.map \
