@@ -3,6 +3,7 @@
    License text can be found in the licenses/ folder. */
 
 // FIXME: this comment is a superficial change to test GitHub actions; it should be removed when testing is done.
+// a
 
 import { AboutDialog } from './about-dialog.js';
 import { ContextMenu } from './context-menu.js';
