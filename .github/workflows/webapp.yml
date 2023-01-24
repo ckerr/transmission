@@ -1,4 +1,4 @@
-name: WebAppPullChecker
+name: web-app-actions
 on:
   push:
     branches:
