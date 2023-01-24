@@ -49,8 +49,6 @@ jobs:
     steps:
       - name: Get source
         uses: actions/checkout@v3
-        with:
-          fetch-depth: 2 # >1 needed for merge base
       - name: Get dependencies
         run: |
           set -x # echo all executed commands to the terminal
@@ -61,14 +59,15 @@ jobs:
         run: |
           set -x # echo all executed commands to the terminal
           set -e # abort if any command fails
-          git fetch --depth=1 origin main
           cd web
           npm install
           npm run lint:fix
           set +e # do not end the script if a cmd returns an exit code
-          git diff --exit-code --merge-base "origin/$GITHUB_BASE_REF" . > style.diff
+          git diff --exit-code . > style.diff
           echo "differs=$?" >> $GITHUB_OUTPUT
+          echo ===
           cat style.diff
+          echo ===
           set -e # undo set +e
       - name: Upload diffs
         uses: actions/upload-artifact@v2
