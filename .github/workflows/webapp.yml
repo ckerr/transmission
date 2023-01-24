@@ -13,10 +13,6 @@ jobs:
       test-style: ${{ steps.check-diffs.outputs.web-changed == '1' }}
       test-artifacts: ${{ steps.check-diffs.outputs.web-changed == '1' && steps.check-main-push.outputs.is-main-push == '0'}}
     steps:
-      - name: Show environment
-        run: |
-          env | sort
-          git --version
       - name: Get source
         uses: actions/checkout@v3
         with:
@@ -33,19 +29,19 @@ jobs:
       - name: Check for diffs
         id: check-diffs
         run: |
-          set -e # do not abort if any command returns a nonzero exit code
           set -x # echo all executed commands to the terminal
-          ls
-          git fetch --all
-          git --no-pager log -n100
-          git merge-base "origin/$GITHUB_BASE_REF" HEAD
-          git branch --all
+          #ls
+          #git fetch --all
+          #git --no-pager log -n100
+          #git merge-base "origin/$GITHUB_BASE_REF" HEAD
+          #git branch --all
           function get_changes() { # name, paths...
             set -x # echo all executed commands to the terminal
             local name="$1"
             shift
-            echo "origin/$GITHUB_BASE_REF"
-            git --version
+            #echo "origin/$GITHUB_BASE_REF"
+            #git --version
+            set -e # do not abort if --exit-code returns a nonzero exit code
             git diff --exit-code --merge-base "origin/$GITHUB_BASE_REF" -- "$@"
             echo "$name-changed=$?" >> "$GITHUB_OUTPUT"
           }
