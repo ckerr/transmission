@@ -87,10 +87,13 @@ jobs:
     steps:
       - name: Get source
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 2 # >1 needed for merge base
       - name: Check for changes to generated files
         run: |
           set -x # echo all executed commands to the terminal
+          git fetch --depth=1 origin main
           echo Checking for changes to generated files.
           echo No files should be listed here. If any are, please remove them from your PR.
           set -e # abort if diff --exit-code fails
-          git diff --exit-code --name-only -- web/public-html/transmission-app*
+          git diff --exit-code --name-only --merge-base "origin/$GITHUB_BASE_REF" -- web/public-html/transmission-app*
