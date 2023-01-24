@@ -13,6 +13,10 @@ jobs:
       test-style: ${{ steps.check-diffs.outputs.web-changed == '1' }}
       test-artifacts: ${{ steps.check-diffs.outputs.web-changed == '1' && steps.check-main-push.outputs.is-main-push == '0'}}
     steps:
+      - name: Show environment
+        run |
+          env
+          git --version
       - name: Check Push to Main Branch
         id: check-main-push
         run: |
@@ -29,7 +33,7 @@ jobs:
           function get_changes() { # name, paths...
             local name="$1"
             shift
-            git diff --exit-code --merge-base "origin/${GITHUB_BASE_REF}" -- "$@"
+            git diff --exit-code --merge-base "origin/$GITHUB_BASE_REF" -- "$@"
             echo "$name-changed=$?" >> "$GITHUB_OUTPUT"
           }
           get_changes web CMakeLists.txt web
