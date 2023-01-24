@@ -1,4 +1,4 @@
-name: web-app-actions
+name: webapp
 on:
   push:
     branches:
