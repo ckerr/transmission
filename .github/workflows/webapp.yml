@@ -117,6 +117,9 @@ jobs:
     needs: [ decide-what-jobs-to-run ]
     if: ${{ needs.decide-what-jobs-to-run.outputs.update-generated-files == 'true' }}
     steps:
+      - name: Show env
+        run: |
+          env | sort
       - name: Get dependencies
         run: |
           set -e # abort if any command fails
@@ -137,8 +140,9 @@ jobs:
       - name: Create pull request
         uses: peter-evans/create-pull-request@v4
         with:
-          commit-message: Update genereated webapp files
-          branch: update-webapp-files
+          branch: 'chore/update-webapp-files'
+          commit-message: 'chore: update generated transmission-web files'
           delete-branch: true
-          title: Update genereated webapp files
+          title: 'chore: update generated transmission-web files'
+          body: 'Generated from https://github.com/${{GITHUB_REPOSITORY}}/actions/runs/${GITHUB_RUN_ID}/ ."
 
