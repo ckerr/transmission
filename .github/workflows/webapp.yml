@@ -97,8 +97,8 @@ jobs:
           git fetch --quiet --depth=1 origin "$GITHUB_BASE_REF"
           set -e # abort if diff --exit-code fails
           echo
-          echo Hello, code contributor!
-          echo For security reasons, PRs that change generated files are not accepted. Please undo your changes to these files:
+          echo For security reasons, ${GITHUB_REPOSITORY} does not accept PRs that change generated files.
+          echo Please undo your changes to these files:
           git diff --exit-code --name-only --merge-base "origin/$GITHUB_BASE_REF" -- \
               web/public_html/transmission-app.js \
               web/public_html/transmission-app.js.map \
