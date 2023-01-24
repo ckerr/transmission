@@ -117,6 +117,7 @@ jobs:
     needs: [ decide-what-jobs-to-run ]
     if: ${{ needs.decide-what-jobs-to-run.outputs.update-generated-files == 'true' }}
     steps:
+      - name: Get dependencies
         run: |
           set -e # abort if any command fails
           sudo apt-get install -y npm
