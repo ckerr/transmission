@@ -2,6 +2,8 @@
    It may be used under GPLv2 (SPDX: GPL-2.0-only).
    License text can be found in the licenses/ folder. */
 
+// FIXME: this comment is a superficial change to test GitHub actions; it should be removed when testing is done.
+
 import { AboutDialog } from './about-dialog.js';
 import { ContextMenu } from './context-menu.js';
 import { Formatter } from './formatter.js';
