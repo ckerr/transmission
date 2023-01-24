@@ -19,6 +19,8 @@ jobs:
           git --version
       - name: Get source
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 2
       - name: Check Push to Main Branch
         id: check-main-push
         run: |
