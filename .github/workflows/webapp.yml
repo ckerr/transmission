@@ -94,7 +94,7 @@ jobs:
           fetch-depth: 2 # >1 needed for merge base
       - name: Check for changes to generated files
         run: |
-          git fetch --depth=1 origin "$GITHUB_BASE_REF"
+          git fetch --quiet --depth=1 origin "$GITHUB_BASE_REF"
           set -e # abort if diff --exit-code fails
           echo For security reasons, code submissions to generated files are not accepted. Please remove these files from your PR:
           git diff --exit-code --name-only --merge-base "origin/$GITHUB_BASE_REF" -- \
