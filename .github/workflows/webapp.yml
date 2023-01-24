@@ -16,8 +16,10 @@ jobs:
       - name: Get source
         uses: actions/checkout@v3
         with:
-          fetch-depth: 2
-      - name: Check Push to Main Branch
+          fetch-depth: 2 # >1 needed for merge base
+        run: |
+          git fetch --depth=1 origin main
+      - name: Check push-to-main
         id: check-main-push
         run: |
           set -x # echo all executed commands to the terminal
@@ -30,18 +32,9 @@ jobs:
         id: check-diffs
         run: |
           set -x # echo all executed commands to the terminal
-          #ls
-          git fetch --depth=1 origin
-          #git fetch --all
-          #git --no-pager log -n100
-          #git merge-base "origin/$GITHUB_BASE_REF" HEAD
-          #git branch --all
           function get_changes() { # name, paths...
-            set -x # echo all executed commands to the terminal
             local name="$1"
             shift
-            #echo "origin/$GITHUB_BASE_REF"
-            #git --version
             set +e # do not abort if --exit-code returns a nonzero exit code
             git diff --exit-code --merge-base "origin/$GITHUB_BASE_REF" -- "$@"
             echo "$name-changed=$?" >> "$GITHUB_OUTPUT"
@@ -57,6 +50,10 @@ jobs:
     steps:
       - name: Get source
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 2 # >1 needed for merge base
+        run: |
+          git fetch --depth=1 origin main
       - name: Get dependencies
         run: |
           set -x # echo all executed commands to the terminal
@@ -71,7 +68,7 @@ jobs:
           npm install
           npm run lint:fix
           set +e # do not end the script if a cmd returns an exit code
-          git diff --exit-code . > style.diff
+          git diff --exit-code --merge-base "origin/$GITHUB_BASE_REF" -- web > style.diff
           echo "differs=$?" >> $GITHUB_OUTPUT
           cat style.diff
           set -e # undo set +e
